@@ -39,8 +39,7 @@ struct SpotLight {
 #define MAX_SPOT_LIGHTS 10
 
 layout(std140, binding = 0) uniform LightUBO {
-    PointLight point_lights;
-    int point_light_count;
+    PointLight point_lights[MAX_POINT_LIGHTS];
 };
 
 const float PI = 3.14159265359;
@@ -142,9 +141,9 @@ void main()
     F0 = mix(F0, texture_sampled.rgb, metallic);
     vec3 Lo = vec3(0.0);
     // ambient
-    for (int i = 0; i < point_light_count; ++i)
+    for (int i = 0; i < 1; ++i)
     {
-        Lo += CalculatePointLight(point_lights, N, V, albedo, F0, roughness, metallic);
+        Lo += CalculatePointLight(point_lights[i], N, V, albedo, F0, roughness, metallic);
     }	  
     
     vec3 diffuse = albedo;
