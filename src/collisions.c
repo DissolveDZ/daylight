@@ -7,12 +7,11 @@
 static inline bool CheckCollisionRec(Rectangle rec1, Rectangle rec2)
 {
    bool collision = false;
-   if ((rec1.x - rec1.width / 2 < (rec2.x + rec2.width) && (rec1.x + rec1.width / 2) > rec2.x) &&
-       (rec1.y > (rec2.y - rec2.height) && rec1.y < (rec2.y + rec2.height)))
+   if ((rec1.x - rec1.width / 2 < (rec2.x + rec2.width / 2) && (rec1.x + rec1.width / 2) > rec2.x - rec2.width / 2) &&
+       (rec1.y - rec1.height / 2 < (rec2.y + rec2.height / 2) && (rec1.y + rec1.height / 2) > rec2.y - rec2.height / 2))
       collision = true;
    return collision;
 }
-
 static inline bool CheckColliders(Collider col1, Collider col2)
 {
    bool collision = false;
