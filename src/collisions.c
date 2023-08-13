@@ -1,170 +1,68 @@
-// #include <raylib.h>
 #include <stdio.h>
 #include <stdlib.h>
 // #include <raymath.h>
 #include "main.h"
 #pragma once
 
-float Vector2Length(Vector2 vector)
-{
-   return sqrtf(vector.x * vector.x + vector.y * vector.y);
-}
-
-Vector2 Vector2Perpendicular(Vector2 vector)
-{
-   return (Vector2){-vector.y, vector.x};
-}
-
-Vector2 Vector2Normalize(Vector2 vector)
-{
-   float length = Vector2Length(vector);
-   if (length > 0)
-   {
-      vector.x /= length;
-      vector.y /= length;
-   }
-   return vector;
-}
-
-Vector2 Vector2Add(Vector2 v1, Vector2 v2)
-{
-   Vector2 result;
-   result.x = v1.x + v2.x;
-   result.y = v1.y + v2.y;
-   return result;
-}
-
-Vector2 Vector2Subtract(Vector2 v1, Vector2 v2)
-{
-   Vector2 result;
-   result.x = v1.x - v2.x;
-   result.y = v1.y - v2.y;
-   return result;
-}
-
-float Vector2Dot(Vector2 v1, Vector2 v2)
-{
-   return v1.x * v2.x + v1.y * v2.y;
-}
-
-Vector2 Vector2Scale(Vector2 v, float scale)
-{
-   Vector2 result;
-   result.x = v.x * scale;
-   result.y = v.y * scale;
-   return result;
-}
-
 static inline bool CheckCollisionRec(Rectangle rec1, Rectangle rec2)
 {
    bool collision = false;
-   if ((rec1.x - rec1.width / 2 < rec2.x + rec2.width / 2) &&
-       (rec1.x + rec1.width / 2 > rec2.x - rec2.width / 2) &&
-       (rec1.y - rec1.height / 2 < rec2.y + rec2.height / 2) &&
-       (rec1.y + rec1.height / 2 > rec2.y - rec2.height / 2))
-   {
+   if ((rec1.x - rec1.width / 2 < (rec2.x + rec2.width) && (rec1.x + rec1.width / 2) > rec2.x) &&
+       (rec1.y > (rec2.y - rec2.height) && rec1.y < (rec2.y + rec2.height)))
       collision = true;
-   }
    return collision;
 }
 
 static inline bool CheckColliders(Collider col1, Collider col2)
 {
    bool collision = false;
-   if ((col1.x - col1.width / 2 < col2.x + col2.width / 2) &&
-       (col1.x + col1.width / 2 > col2.x - col2.width / 2) &&
-       (col1.y - col1.height / 2 < col2.y + col2.height / 2) &&
-       (col1.y + col1.height / 2 > col2.y - col2.height / 2))
-   {
+   if ((col1.x - col1.width / 2 < (col2.x + col2.width / 2) && (col1.x + col1.width / 2) > col2.x - col2.width / 2) &&
+       (col1.y - col1.height / 2 < (col2.y + col2.height / 2) && (col1.y + col1.height / 2) > col2.y - col2.height / 2))
       collision = true;
-   }
    return collision;
-}
-
-typedef struct
-{
-   float min;
-   float max;
-   Vector2 axis;
-} Projection;
-
-// Function to calculate dot product of two vectors
-float Dot(Vector2 a, Vector2 b)
-{
-   return a.x * b.x + a.y * b.y;
-}
-
-// Function to check if two projections overlap
-bool Overlap(Projection a, Projection b)
-{
-   return !(a.max < b.min || b.max < a.min);
-}
-
-Projection Project(Collider shape, Vector2 axis)
-{
-   Projection projection;
-
-   float projectionCenter = Dot((Vector2){shape.x, shape.y}, axis);
-   float projectionExtentX = shape.width / 2.0f * fabsf(axis.x);
-   float projectionExtentY = shape.height / 2.0f * fabsf(axis.y);
-
-   projection.min = projectionCenter - projectionExtentX - projectionExtentY;
-   projection.max = projectionCenter + projectionExtentX + projectionExtentY;
-   projection.axis = axis;
-
-   return projection;
-}
-bool CheckCollisionSAT(Collider a, Collider b)
-{
-   Vector2 axisAtoB = Vector2Normalize(Vector2Subtract((Vector2){b.x, b.y}, (Vector2){a.x, a.y}));
-   Vector2 axisBtoA = Vector2Normalize(Vector2Subtract((Vector2){a.x, a.y}, (Vector2){b.x, b.y}));
-
-   Vector2 axes[2] = {
-       axisAtoB,
-       axisBtoA};
-
-   for (int i = 0; i < 2; i++)
-   {
-      Vector2 axis = axes[i];
-
-      float lenSqr = axis.x * axis.x + axis.y * axis.y;
-      if (lenSqr < 0.0001)
-      {
-         continue; // Skip tiny axes
-      }
-
-      float invLen = 1.0f / sqrtf(lenSqr);
-      axis.x *= invLen;
-      axis.y *= invLen;
-
-      Projection projA = Project(a, axis);
-      Projection projB = Project(b, axis);
-
-      if (!Overlap(projA, projB))
-      {
-         return false; // Separating axis found, no collision
-      }
-   }
-
-   return true; // All axes overlap, collision detected
 }
 
 Collider GetCollisionArea(Collider rec1, Collider rec2)
 {
    Collider overlap = {0};
 
-   float left = fmaxf(rec1.x - rec1.width / 2, rec2.x - rec2.width / 2);
-   float right = fminf(rec1.x + rec1.width / 2, rec2.x + rec2.width / 2);
-   float top = fmaxf(rec1.y - rec1.height / 2, rec2.y - rec2.height / 2);
-   float bottom = fminf(rec1.y + rec1.height / 2, rec2.y + rec2.height / 2);
+   float left = (rec1.x - rec1.width / 2 > rec2.x - rec2.width / 2) ? rec1.x - rec1.width / 2 : rec2.x - rec2.width / 2;
+   float right1 = rec1.x + rec1.width / 2;
+   float right2 = rec2.x + rec2.width / 2;
+   float right = (right1 < right2) ? right1 : right2;
+   float top = (rec1.y + rec1.height / 2 < rec2.y + rec2.height / 2) ? rec1.y + rec1.height / 2 : rec2.y + rec2.height / 2;
+   float bottom1 = rec1.y - rec1.height / 2;
+   float bottom2 = rec2.y - rec2.height / 2;
+   float bottom = (bottom1 > bottom2) ? bottom1 : bottom2;
 
-   overlap.x = (left + right) / 2;
-   overlap.y = (top + bottom) / 2;
-   overlap.width = right - left;
-   overlap.height = bottom - top;
-
+   if ((left < right) && (top > bottom))
+   {
+      overlap.width = right - left;
+      overlap.height = top - bottom;
+      overlap.x = left + overlap.width / 2;
+      overlap.y = top - overlap.height / 2;
+   }
    return overlap;
 }
+
+static inline bool CheckRotatingColliders(Collider col1, Collider col2)
+{
+   bool collision = false;
+   if ((col1.x < (col2.x + col2.width / 2) && (col1.x + col1.width / 2) > col1.x) &&
+       (col1.y < (col2.y + col2.height / 2) && (col1.y + col1.height / 2) > col1.y))
+      collision = true;
+   return collision;
+}
+
+float x1 = 0; // points for line (controlled by mouse)
+float y_1 = 0;
+float x2 = 0; // static point
+float y2 = 0;
+
+float sx = 200; // square position
+float sy = 100;
+float sw = 200; // and size
+float sh = 200;
 
 float intersectionX = 0;
 float intersectionY = 0;
@@ -210,138 +108,82 @@ PointIntersect lineRect(float x1, float y_1, float x2, float y2, float rx, float
       return bottom;
    return (PointIntersect){0, 0, false};
 }
-void ResolveCollision(Entity *ent, int index)
+int min()
 {
-   Collider boxCollider = Boxes[index]; // Assuming Boxes is an array of Colliders
-   Collider entCollider = ent->col;
-
-   Vector2 axes[2] = {
-       (Vector2){1, 0}, // X-axis
-       (Vector2){0, 1}  // Y-axis
-   };
-
-   Vector2 mtv = {0, 0}; // Minimum Translation Vector
-   float minOverlap = INFINITY;
-
-   for (int i = 0; i < 2; i++)
-   {
-      Vector2 axis = axes[i];
-
-      Projection projA = Project(entCollider, axis);
-      Projection projB = Project(boxCollider, axis);
-
-      if (!Overlap(projA, projB))
-      {
-         // Separating axis found, no collision
-         return;
-      }
-
-      // Calculate overlap along the axis
-      float overlap = fminf(projA.max, projB.max) - fmaxf(projA.min, projB.min);
-
-      if (overlap < minOverlap)
-      {
-         minOverlap = overlap;
-         mtv = axis;
-      }
-   }
-
-   // Apply the MTV to resolve the collision
-   Vector2 normal = Vector2Normalize(mtv);
-
-   // Adjust the entity's position to resolve the collision
-   float penetrationDepth = minOverlap;
-   Vector2 correction = Vector2Scale(normal, penetrationDepth);
-   ent->col.x += correction.x;
-   ent->col.y += correction.y;
-
-   // Update velocity based on collision
-   float dotProduct = Vector2Dot(ent->velocity, normal);
-   Vector2 collisionVelocity = Vector2Scale(normal, dotProduct);
-   ent->velocity = Vector2Subtract(ent->velocity, collisionVelocity);
+   return 0;
 }
-bool CheckCollisionAndResolveSAT(Entity *ent, int entIndex, Collider *colliders, int numColliders)
+int CheckCollisionX(Entity *ent, int index)
 {
-    Collider entCollider = ent->col;
-    bool collisionDetected = false;
-
-    for (int i = 0; i < numColliders; i++)
-    {
-        if (i != entIndex)
-        {
-            Collider boxCollider = colliders[i]; // Assuming colliders is an array of Colliders
-
-            Vector2 axisAtoB = Vector2Normalize(Vector2Subtract((Vector2){boxCollider.x, boxCollider.y}, (Vector2){entCollider.x, entCollider.y}));
-            Vector2 axisBtoA = Vector2Perpendicular(axisAtoB);
-
-            Vector2 axes[2] = {
-                axisAtoB,
-                axisBtoA
-            };
-
-            bool axesOverlap = true;
-            float minOverlap = INFINITY;
-            Vector2 mtv = {0, 0};
-
-            for (int j = 0; j < 2; j++)
-            {
-                Vector2 axis = axes[j];
-
-                Projection projA = Project(entCollider, axis);
-                Projection projB = Project(boxCollider, axis);
-
-                if (!Overlap(projA, projB))
-                {
-                    axesOverlap = false; // Separating axis found, no collision
-                    break;
-                }
-
-                // Calculate overlap along the axis
-                float overlap = fminf(projA.max, projB.max) - fmaxf(projA.min, projB.min);
-                if (overlap < minOverlap)
-                {
-                    minOverlap = overlap;
-                    mtv = axis;
-                }
-            }
-
-            if (axesOverlap)
-            {
-                collisionDetected = true;
-
-                Vector2 normal = Vector2Normalize(mtv);
-
-                // Calculate penetration depth
-                float penetrationDepth = minOverlap;
-
-                // Apply the MTV to resolve the collision
-                Vector2 correction = Vector2Scale(normal, penetrationDepth);
-                ent->col.x += correction.x;
-                ent->col.y += correction.y;
-
-                // Update velocity based on collision
-                float dotProduct = Vector2Dot(ent->velocity, normal);
-                Vector2 collisionVelocity = Vector2Scale(normal, dotProduct);
-                ent->velocity = Vector2Subtract(ent->velocity, collisionVelocity);
-            }
-        }
-    }
-
-    return collisionDetected;
-}
-
-bool CheckCollisionXY(Entity *ent, int index)
-{
-   Collider entCollider = ent->col;
-   Collider boxCollider = Boxes[index]; // Assuming Boxes is an array of Colliders
-   if (CheckCollisionSAT(entCollider, boxCollider))
+   if (CheckColliders((Collider){ent->col.x + (ent->velocity.x * frame_time), ent->col.y, ent->col.width, ent->col.height, false, false, NULL}, Boxes[index]))
    {
-      ResolveCollision(ent, index);
-      ent->is_floor = true;
-      return true;
+      PointIntersect point;
+      point.hit = false;
+      // printf("pelocity x: %f", ent->velocity.x);
+      Vector2 new = (Vector2){ent->col.x, ent->col.y};
+      if (ent->velocity.x < 0)
+      {
+         point = lineRect(new.x, new.y, new.x - ent->col.width / 2 + (ent->velocity.x * frame_time), new.y, Boxes[index].x, Boxes[index].y, Boxes[index].width, Boxes[index].height);
+      }
+      else if (ent->velocity.x > 0)
+      {
+         point = lineRect(new.x, new.y, new.x + ent->col.width / 2 + (ent->velocity.x * frame_time), new.y, Boxes[index].x, Boxes[index].y, Boxes[index].width, Boxes[index].height);
+      }
+      if (point.hit)
+      {
+         if (ent->velocity.x < 0)
+         {
+            // printf("left");
+            ent->col.x = point.dist.x + ent->col.width / 2;
+            ent->col.x -= GetCollisionArea(ent->col, Boxes[index]).width;
+         }
+         else
+         {
+            // printf("right");
+            ent->col.x = point.dist.x - ent->col.width / 2;
+            ent->col.x -= GetCollisionArea(ent->col, Boxes[index]).width;
+         }
+      }
+      ent->velocity.x = 0;
+      return 1;
    }
-
-   return false;
+   else
+      return 0;
+}
+int CheckCollisionY(Entity *ent, int index)
+{
+   if (CheckColliders((Collider){ent->col.x, ent->col.y + (ent->velocity.y * frame_time), ent->col.width, ent->col.height, false, false, NULL}, Boxes[index]))
+   {
+      PointIntersect point;
+      if (ent->velocity.y < 0)
+      {
+         Vector2 new = (Vector2){ent->col.x, ent->col.y};
+         point = lineRect(new.x, new.y, new.x, new.y - ent->col.height / 2 + (ent->velocity.y * frame_time), Boxes[index].x, Boxes[index].y, Boxes[index].width, Boxes[index].height);
+      }
+      else if (ent->velocity.y > 0)
+      {
+         Vector2 new = (Vector2){ent->col.x, ent->col.y};
+         point = lineRect(new.x, new.y, new.x, new.y + ent->col.height / 2 + (ent->velocity.y * frame_time), Boxes[index].x, Boxes[index].y, Boxes[index].width, Boxes[index].height);
+      }
+      if (point.hit)
+      {
+         if (ent->velocity.y < 0)
+         {
+            // printf("down");
+            ent->col.y = point.dist.y + ent->col.height / 2;
+            ent->col.y += GetCollisionArea(ent->col, Boxes[index]).height;
+         }
+         else
+         {
+            // printf("up");
+            ent->col.y = point.dist.y - ent->col.height / 2;
+            ent->col.y -= GetCollisionArea(ent->col, Boxes[index]).height;
+         }
+      }
+      ent->velocity.y = 0;
+      return 1;
+   }
+   else
+      return 0;
 }
 bool CheckFloor(Entity *ent, int index)
 {
@@ -352,18 +194,15 @@ bool CheckFloor(Entity *ent, int index)
    }
    return false;
 }
-
 bool ReactToSolid(Entity *ent)
 {
-   printf("no\n");
    bool hit = false;
-   if (CheckCollisionAndResolveSAT(ent, -1, Boxes, state.cur_colliders))
+   for (int i = 0; i < state.cur_colliders; i++)
    {
-      hit = true;
-   }
-   if (hit)
-   {
-      printf("yes\n");
+      if (CheckCollisionX(ent, i))
+         hit = true;
+      if (CheckCollisionY(ent, i))
+         hit = true;
    }
    return hit;
 }
