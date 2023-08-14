@@ -19,8 +19,28 @@ typedef struct PointLight
     vec3 color;
     float padding2;
     vec3 ambient;
-    float padding3;
+    float intensity;
+    float radius;
+    vec3 padding3;
 } PointLight;
+
+typedef struct DirectionalLight
+{
+    vec3 color;
+    vec3 ambient;
+    vec3 direction;
+} DirectionalLight;
+
+typedef struct SpotLight
+{
+    vec3 pos;
+    vec3 color;
+    vec3 ambient;
+    vec3 direction;
+    float cutoff;
+    float outer_cutoff;
+    float falloff_mulitplier;
+} SpotLight;
 
 int point_light_count;
 
@@ -36,11 +56,10 @@ static inline void InitLights()
     glBindBuffer(GL_UNIFORM_BUFFER, lights_ubo);
     glBufferData(GL_UNIFORM_BUFFER, sizeof(PointLight)*MAX_POINT_LIGHTS + sizeof(vec4), NULL, GL_DYNAMIC_DRAW);
     glBindBufferBase(GL_UNIFORM_BUFFER, 0, lights_ubo);
-    //glBindBufferRange(GL_UNIFORM_BUFFER, 0, lights_ubo, 0, 496);
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
 }
 
-PointLight *CreatePointLight(vec3 position, vec3 color, vec3 ambient)
+PointLight *CreatePointLight(vec3 position, vec3 color, vec3 ambient, float intensity, float radius)
 {
     if (point_light_count >= MAX_POINT_LIGHTS)
     {
@@ -54,21 +73,22 @@ PointLight *CreatePointLight(vec3 position, vec3 color, vec3 ambient)
     glm_vec3_copy(position, light->position);
     glm_vec3_copy(color, light->color);
     glm_vec3_copy(ambient, light->ambient);
-
+    light->intensity = intensity;
+    light->radius = radius;
     point_light_count++;
     return light;
 }
-int tesst = 1;
+
 static inline void UpdateLights()
 {
-    glBindBuffer(GL_UNIFORM_BUFFER, lights_ubo);
-    // Update the point light count in the UBO buffer
-    //glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(long), &point_light_count);
-    
-    glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(PointLight) * point_light_count, point_lights);
-    glBufferSubData(GL_UNIFORM_BUFFER, sizeof(PointLight) * MAX_POINT_LIGHTS, sizeof(long), &point_light_count);
-    
-    glBindBuffer(GL_UNIFORM_BUFFER, 0);
+    // Update the lights in the UBO buffer
+    if (point_light_count)
+    {
+        glBindBuffer(GL_UNIFORM_BUFFER, lights_ubo);
+        glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(PointLight) * point_light_count, point_lights);
+        glBufferSubData(GL_UNIFORM_BUFFER, sizeof(PointLight) * MAX_POINT_LIGHTS, sizeof(long), &point_light_count);
+        glBindBuffer(GL_UNIFORM_BUFFER, 0);
+    }
 }
 
 static inline void FreeLights()
