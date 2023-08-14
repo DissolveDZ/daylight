@@ -40,6 +40,7 @@ struct SpotLight {
 
 layout(std140, binding = 0) uniform LightUBO {
     PointLight point_lights[MAX_POINT_LIGHTS];
+    int point_light_count;
 };
 
 const float PI = 3.14159265359;
@@ -141,7 +142,7 @@ void main()
     F0 = mix(F0, texture_sampled.rgb, metallic);
     vec3 Lo = vec3(0.0);
     // ambient
-    for (int i = 0; i < 1; ++i)
+    for (int i = 0; i < point_light_count; ++i)
     {
         Lo += CalculatePointLight(point_lights[i], N, V, albedo, F0, roughness, metallic);
     }	  
