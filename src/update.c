@@ -177,7 +177,7 @@ void Update()
     state.mouse_world = GetScreenToWorld2D((Vector2){x, y});
     pight->position[0] = state.player.entity.col.x;
     pight->position[1] = state.player.entity.col.y;
-    pight->position[2] = 0.5f;
+    pight->position[2] = 1.0f;
     UpdateLights();                                                                                                                                                            
     // printf("mouse x: %f mouse y: %f\n", state.mouse_world.x, state.mouse_world.y);
     // printf("framerate: %f\n", 1/frame_time);

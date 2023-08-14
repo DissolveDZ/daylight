@@ -1,5 +1,6 @@
 #include "main.h"
 // #include "collisions.c"
+float p = 0;
 void Draw()
 {
     glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
@@ -22,8 +23,9 @@ void Draw()
     DrawLine((Vector2){state.player.entity.col.x, state.player.entity.col.y}, state.mouse_world, (vec4){50.f, 50.f, 50.f, 255.f});
     DrawLine((Vector2){state.player.entity.col.x, state.player.entity.col.y}, (Vector2){state.player.entity.col.x + state.player.entity.velocity.x * frame_time * 20, state.player.entity.col.y + state.player.entity.velocity.y * frame_time * 20}, (vec4){255.f, 50.f, 50.f, 255.f});
     DrawRectangleBasic((Rectangle){intersectionX, intersectionY, 0.25f, 0.25f, 0}, (vec4){0.f, 0.f, 0.f, 255.f});
-    DrawCube((vec3){1, 2, 0.5f}, (vec3){1, 1, 1}, (vec3){0.5f, 0.5f, 0.5f});
-    DrawCube((vec3){3, 2, 0.5f}, (vec3){5, 1, 1}, (vec3){-0.25f, -0.25f, -0.25f});
+        p += frame_time;
+    DrawCube((vec3){1, 1.5, 0.5f}, (vec3){1, 1, 1}, (Vector3){p*20, 0, p*20});
+    DrawCube((vec3){5, 2, 0.5f}, (vec3){5, 1, 1}, (Vector3){40, 40.f, 20.f});
     SDL_GL_SwapWindow(window);
     /*
     DrawTextureV(water_noise, (Vector2){water.x, water.y}, WHITE);
