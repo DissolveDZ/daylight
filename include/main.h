@@ -352,7 +352,7 @@ void DrawEntity(Rectangle rec)
     glBindVertexArray(0);
 }
 
-void DrawCube(vec3 position, vec3 scale, vec3 rotation)
+void DrawCube(vec3 position, vec3 scale, Vector3 rotation)
 {
     glEnable(GL_DEPTH_TEST);
     UseShader(advanced);
@@ -366,9 +366,32 @@ void DrawCube(vec3 position, vec3 scale, vec3 rotation)
     SetShaderVec3(advanced.ID, "view_pos", (vec3){state.camera.position.x, state.camera.position.y, state.camera.position.z});
 
     glm_mat4_identity(model);
+    mat4 temp;
+    glm_mat4_identity(temp);
+    versor quater;
+    glm_quat_identity(quater);
+    mat4 idendidy;
+    glm_mat4_identity(idendidy);
+    mat4 transformx;
+    glm_mat4_identity(transformx);
+    glm_rotate(transformx, glm_rad(rotation.x), (vec3){1.f, 0.f, 0.f});
+    mat4 transformy;
+    glm_mat4_identity(transformy);
+    glm_rotate(transformy, glm_rad(rotation.y), (vec3){0.f, 1.f, 0.f});
+    mat4 transformz;
+    glm_mat4_identity(transformz);
+    glm_rotate(transformz, glm_rad(rotation.z), (vec3){0.f, 0.f, 1.f});
+    mat4 rotationmat;
+    glm_mat4_identity(rotationmat);
+    glm_mul(transformy, transformx, temp);
+    glm_mul(temp, transformz, rotationmat);
+
+    // glm_quat_from_vecs((vec3){0, 0, 0}, (vec3){glm_rad(rotation.y), glm_rad(rotation.x), glm_rad(rotation.z)}, quater);
+    // glm_quat_mat4(quater, temp);
     glm_translate(model, position);
+    glm_mat4_mul(model, rotationmat, model);
     glm_scale(model, scale);
-    //glm_rotate(model, glm_rad((float)SDL_GetTicks64() / 50), rotation);
+    // glm_rotate(model, glm_rad((float)SDL_GetTicks64() / 50), rotation);
     SetShaderMat4(advanced.ID, "model", model);
 
     glBindVertexArray(cubeVAO);

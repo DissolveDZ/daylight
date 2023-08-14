@@ -44,7 +44,7 @@ void Init()
     BufferSetup(&planeVAO, &VBO, plane_vertices, sizeof(plane_vertices), true, false);
     BufferSetup(&lineVAO, &lineVBO, line_vertices, sizeof(line_vertices), false, false);
     BufferSetup(&cubeVAO, &cubeVBO, cube_vertices, sizeof(cube_vertices), true, true);
-    stbi_set_flip_vertically_on_load(true);
+    stbi_set_flip_vertically_on_load(1);
     // glEnable(GL_DEPTH_TEST);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -94,15 +94,15 @@ void Init()
 
     InitLights();
     pight = CreatePointLight((vec3){0, 0, 1}, (vec3){2, 2, 2}, (vec3){0.1f, 0.1f, 0.1f}, 1, 1);
-    PointLight *leight = CreatePointLight((vec3){5, 2, 2}, (vec3){2, 2, 2}, (vec3){0.1f, 0.1f, 0.1f}, 3.4f, 1.2f);
-    PointLight *dr = CreatePointLight((vec3){0, 1, 1}, (vec3){2, 2, 2}, (vec3){0.1f, 0.1f, 0.1f}, 3.4f, 1.2f);
-    PointLight *v = CreatePointLight((vec3){0, 2, 1}, (vec3){2, 2, 2}, (vec3){0.1f, 0.1f, 0.1f}, 3.4f, 1.2f);
-    PointLight *f = CreatePointLight((vec3){0, 3, 1}, (vec3){2, 2, 2}, (vec3){0.1f, 0.1f, 0.1f}, 3.4f, 1.2f);
-    PointLight *s = CreatePointLight((vec3){0, -1, 1}, (vec3){2, 2, 2}, (vec3){0.1f, 0.1f, 0.1f}, 3.4f, 1.2f);
-    PointLight *sie = CreatePointLight((vec3){1, 0, 1}, (vec3){2, 2, 2}, (vec3){0.1f, 0.1f, 0.1f}, 3.4f, 1.2f);
-    PointLight *ach = CreatePointLight((vec3){2, 0, 1}, (vec3){2, 2, 2}, (vec3){0.1f, 0.1f, 0.1f}, 3.4f, 1.2f);
-    PointLight *neu = CreatePointLight((vec3){3, 0, 1}, (vec3){2, 2, 2}, (vec3){0.1f, 0.1f, 0.1f}, 3.4f, 1.2f);
-    PointLight *zeh = CreatePointLight((vec3){-1, 0, 1}, (vec3){2, 2, 2}, (vec3){0.1f, 0.1f, 0.1f}, 5.0f, 1.2f);
+    PointLight *leight = CreatePointLight((vec3){5, 2, 2}, (vec3){1, 1, 1}, (vec3){0.1f, 0.1f, 0.1f}, 3.4f, 1.2f);
+    PointLight *dr = CreatePointLight((vec3){0, 1, 1}, (vec3){1, 0.7, 0.2}, (vec3){0.1f, 0.1f, 0.1f}, 3.4f, 1.2f);
+    PointLight *v = CreatePointLight((vec3){0, 4, 1}, (vec3){1, 0.7, 0.2}, (vec3){0.1f, 0.1f, 0.1f}, 3.4f, 1.2f);
+    PointLight *f = CreatePointLight((vec3){0, 8, 1}, (vec3){1, 0.7, 0.2}, (vec3){0.1f, 0.1f, 0.1f}, 3.4f, 1.2f);
+    PointLight *s = CreatePointLight((vec3){0, -1, 1}, (vec3){1, 0.7, 0.2}, (vec3){0.1f, 0.1f, 0.1f}, 3.4f, 1.2f);
+    PointLight *sie = CreatePointLight((vec3){1, 0, 1}, (vec3){1, 0.7, 0.2}, (vec3){0.1f, 0.1f, 0.1f}, 3.4f, 1.2f);
+    PointLight *ach = CreatePointLight((vec3){4, 0, 1}, (vec3){1, 0.7, 0.2}, (vec3){0.1f, 0.1f, 0.1f}, 3.4f, 1.2f);
+    PointLight *neu = CreatePointLight((vec3){8, 0, 1}, (vec3){1, 0.7, 0.2}, (vec3){0.1f, 0.1f, 0.1f}, 3.4f, 1.2f);
+    PointLight *zeh = CreatePointLight((vec3){-1, 0, 1}, (vec3){1, 0.7, 0.2}, (vec3){0.1f, 0.1f, 0.1f}, 5.0f, 1.2f);
     //point = CreatePointLight((vec3){0, 0, 1}, (vec3){1, 1, 1}, (vec3){0.1f, 0.1f, 0.1f}, 1);
     //printf("Point lights count: %d\n", light_ubo_data->point_light_count);
     // Now update the UBO with the new data
