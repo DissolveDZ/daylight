@@ -144,6 +144,15 @@ void ProcessInputs()
             }
             break;
         case SDL_KEYDOWN:
+            switch (window_event.key.keysym.scancode)
+                case SDL_SCANCODE_F11:
+                    state.fullscreen = !state.fullscreen;
+                    if (state.fullscreen)
+                        SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN_DESKTOP);
+                    else
+                        SDL_SetWindowFullscreen(window, SDL_WINDOW_BORDERLESS);
+                // SDL_SetWindowDisplayMode(window, SDL_WINDOW_BORDERLESS);
+                break;
             break;
         case SDL_WINDOWEVENT:
             if (window_event.window.event == SDL_WINDOWEVENT_SIZE_CHANGED)
@@ -167,7 +176,7 @@ void Update()
     PlayerMovement(&state.player);
     glm_mat4_identity(projection);
     if (screen_height && screen_width)
-        glm_perspective(glm_rad((float)screen_height/state.camera.fov), (float)screen_width / (float)screen_height, 0.1, 1000, projection);
+        glm_perspective(glm_rad((float)screen_height / state.camera.fov), (float)screen_width / (float)screen_height, 0.1, 1000, projection);
     state.camera.position.x = Lerp(state.camera.position.x, state.player.entity.col.x, 7.5f * frame_time);
     state.camera.position.y = Lerp(state.camera.position.y, state.player.entity.col.y, 7.5f * frame_time);
     state.camera.position.z = Lerp(state.camera.position.z, state.camera.zoom, 7.5f * frame_time);
@@ -178,7 +187,7 @@ void Update()
     pight->position[0] = state.player.entity.col.x;
     pight->position[1] = state.player.entity.col.y;
     pight->position[2] = 1.0f;
-    UpdateLights();                                                                                                                                                            
+    UpdateLights();
     // printf("mouse x: %f mouse y: %f\n", state.mouse_world.x, state.mouse_world.y);
     // printf("framerate: %f\n", 1/frame_time);
     /*

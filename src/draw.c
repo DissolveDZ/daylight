@@ -3,6 +3,7 @@
 float p = 0;
 void Draw()
 {
+    p += frame_time;
     glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     vec3 temp;
@@ -19,13 +20,17 @@ void Draw()
         DrawRectangleBasic((Rectangle){Boxes[i].x, Boxes[i].y, Boxes[i].width, Boxes[i].height, 0}, (vec4){125.f, 125.f, 125.f, 255.f});
     }
     DrawEntity((Rectangle){state.player.entity.col.x, state.player.entity.col.y, state.player.entity.col.width, state.player.entity.col.height, state.player.entity.tex.ID});
+
+    // 3D
+    DrawCube((vec3){1, 1.5, 0.5f}, (vec3){1, 1, 1}, (Vector3){p*20, 0, p*20});
+    DrawCube((vec3){5, 2, 0.5f}, (vec3){5, 1, 1}, (Vector3){40, 40.f, 20.f});
+
+    // UI
     DrawRectangleBasic((Rectangle){state.mouse_world.x, state.mouse_world.y, 0.25f, 0.25f, 0}, (vec4){255.f, 50.f, 50.f, 255.f});
     DrawLine((Vector2){state.player.entity.col.x, state.player.entity.col.y}, state.mouse_world, (vec4){50.f, 50.f, 50.f, 255.f});
     DrawLine((Vector2){state.player.entity.col.x, state.player.entity.col.y}, (Vector2){state.player.entity.col.x + state.player.entity.velocity.x * frame_time * 20, state.player.entity.col.y + state.player.entity.velocity.y * frame_time * 20}, (vec4){255.f, 50.f, 50.f, 255.f});
     DrawRectangleBasic((Rectangle){intersectionX, intersectionY, 0.25f, 0.25f, 0}, (vec4){0.f, 0.f, 0.f, 255.f});
-        p += frame_time;
-    DrawCube((vec3){1, 1.5, 0.5f}, (vec3){1, 1, 1}, (Vector3){p*20, 0, p*20});
-    DrawCube((vec3){5, 2, 0.5f}, (vec3){5, 1, 1}, (Vector3){40, 40.f, 20.f});
+
     SDL_GL_SwapWindow(window);
     /*
     DrawTextureV(water_noise, (Vector2){water.x, water.y}, WHITE);

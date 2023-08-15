@@ -7,7 +7,16 @@ void BufferSetup(unsigned int *VAO, unsigned int *VBO, float vertices[], int siz
     glBindVertexArray(*VAO);
     glBindBuffer(GL_ARRAY_BUFFER, *VBO);
     glBufferData(GL_ARRAY_BUFFER, size, vertices, GL_STATIC_DRAW);
-    if (normals)
+    if (normals && textured)
+    {
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *)0);
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *)(3 * sizeof(float)));
+        glEnableVertexAttribArray(1);
+        glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *)(6 * sizeof(float)));
+        glEnableVertexAttribArray(2);
+    }
+    else if (normals)
     {
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void *)0);
         glEnableVertexAttribArray(0);
@@ -33,7 +42,7 @@ void Init()
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 6);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
-    window = SDL_CreateWindow("Wedoe Wonder", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, screen_width, screen_height, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
+    window = SDL_CreateWindow("Wedoe Wonder", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, screen_width, screen_height, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_FULLSCREEN_DESKTOP);
     context = SDL_GL_CreateContext(window);
     gladLoadGLLoader((GLADloadproc)SDL_GL_GetProcAddress);
     SDL_GL_SetSwapInterval(1);
@@ -48,8 +57,10 @@ void Init()
     // glEnable(GL_DEPTH_TEST);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    // glEnable(GL_CULL_FACE);
-    // glCullFace(GL_BACK);
+    //glEnable(GL_CULL_FACE);
+    //glCullFace(GL_BACK);
+    //glFrontFace(GL_CCW);  
+    state.fullscreen = true;
     state.recs_max = 10;
     state.recs = malloc(sizeof(unsigned int) * state.recs_max);
     state.quit = false;
@@ -87,10 +98,10 @@ void Init()
     Boxes[0] = RecToCollider((Rectangle){0, -200, 650, 400, 0}, false, false);
     Boxes[1] = RecToCollider((Rectangle){10, 2.5f, 10, 0.25f}, false, false);
     Boxes[2] = RecToCollider((Rectangle){10, 7, 2.5f, 2.5f}, false, false);
-   // Boxes[2] = RecToCollider((Rectangle){-100, 225, 200, 200}, false, false);
-   // Boxes[3] = RecToCollider((Rectangle){500, 225, 200, 200}, false, false);
-    //Boxes[4] = RecToCollider((Rectangle){100, 275, 50, 50}, false, false);
-    //Boxes[6] = RecToCollider((Rectangle){800, 225, 200, 5}, true, false);
+    // Boxes[2] = RecToCollider((Rectangle){-100, 225, 200, 200}, false, false);
+    // Boxes[3] = RecToCollider((Rectangle){500, 225, 200, 200}, false, false);
+    // Boxes[4] = RecToCollider((Rectangle){100, 275, 50, 50}, false, false);
+    // Boxes[6] = RecToCollider((Rectangle){800, 225, 200, 5}, true, false);
 
     InitLights();
     pight = CreatePointLight((vec3){0, 0, 1}, (vec3){2, 2, 2}, (vec3){0.1f, 0.1f, 0.1f}, 1, 1);
@@ -103,10 +114,10 @@ void Init()
     PointLight *ach = CreatePointLight((vec3){4, 0, 1}, (vec3){1, 0.7, 0.2}, (vec3){0.1f, 0.1f, 0.1f}, 3.4f, 1.2f);
     PointLight *neu = CreatePointLight((vec3){8, 0, 1}, (vec3){1, 0.7, 0.2}, (vec3){0.1f, 0.1f, 0.1f}, 3.4f, 1.2f);
     PointLight *zeh = CreatePointLight((vec3){-1, 0, 1}, (vec3){1, 0.7, 0.2}, (vec3){0.1f, 0.1f, 0.1f}, 5.0f, 1.2f);
-    //point = CreatePointLight((vec3){0, 0, 1}, (vec3){1, 1, 1}, (vec3){0.1f, 0.1f, 0.1f}, 1);
-    //printf("Point lights count: %d\n", light_ubo_data->point_light_count);
-    // Now update the UBO with the new data
-    //UseShader(basic);
+    // point = CreatePointLight((vec3){0, 0, 1}, (vec3){1, 1, 1}, (vec3){0.1f, 0.1f, 0.1f}, 1);
+    // printf("Point lights count: %d\n", light_ubo_data->point_light_count);
+    //  Now update the UBO with the new data
+    // UseShader(basic);
     SetShaderInt(basic.ID, "tex", 0);
     state.player.entity.tex = LoadTexture2D("resources/vedl.png", 0, false);
     cube = LoadTexture2D("resources/cube.png", 0, false);

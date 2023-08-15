@@ -140,6 +140,8 @@ void main()
     vec3 V = normalize(view_pos - FragPos);
     vec3 F0 = vec3(0.04);
     float roughness = 0.2;
+    if (use_normals)
+        roughness = albedo.r * 0.5;
     float metallic = 0.0;
     F0 = mix(F0, texture_sampled.rgb, metallic);
     vec3 Lo = vec3(0.0);
