@@ -1,5 +1,5 @@
-# daylight
-# WIP #
+# daylight - WIP
+
 2D adventure game made with SDL2 and Opengl and any feedback, fixes or optimizations are appreciated.
 currently using basic implementation of PBR and the game will be 2D with 3D objects and advanced lighting techniques.
 
