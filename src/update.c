@@ -167,7 +167,7 @@ void Update()
     PlayerMovement(&state.player);
     glm_mat4_identity(projection);
     if (screen_height && screen_width)
-        glm_perspective(glm_rad(state.camera.fov), (float)screen_width / (float)screen_height, 0.1, 1000, projection);
+        glm_perspective(glm_rad((float)screen_height/state.camera.fov), (float)screen_width / (float)screen_height, 0.1, 1000, projection);
     state.camera.position.x = Lerp(state.camera.position.x, state.player.entity.col.x, 7.5f * frame_time);
     state.camera.position.y = Lerp(state.camera.position.y, state.player.entity.col.y, 7.5f * frame_time);
     state.camera.position.z = Lerp(state.camera.position.z, state.camera.zoom, 7.5f * frame_time);

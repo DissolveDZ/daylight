@@ -1,8 +1,8 @@
 all:
-	gcc src/main.c -Iinclude -lSDL2 -ggdb -o weed -lm -DSDL_MAIN_HANDLED
+	gcc src/main.c -Iinclude -lSDL2 -ggdb -o daylight -lm -DSDL_MAIN_HANDLED
 
 run: all
-	./weed
+	./daylight
 
 windows:
-	gcc src/main.c -Iinclude -lSDL2 -ggdb -o weed -lm -DSLDL_MAIN_HANDLED
+	gcc src/main.c -Iinclude -lSDL2 -ggdb -o daylight -lm -DSLDL_MAIN_HANDLED

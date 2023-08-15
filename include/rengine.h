@@ -1,0 +1,7 @@
+#include "texture.h"
+#include "shader.h"
+#include "lights.h"
+#include "main.h"
+#include "init.c"
+#include "update.c"
+#include "draw.c"
