@@ -1,10 +1,8 @@
 #include <math.h>
 #include <stddef.h> // Include this for offsetof
-#include <GLFW/glfw3.h>
 #include <glad/glad.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <cglm/call.h>
 #include <string.h>
 #include <shader.h> // Assuming this header has GLM's vec3 definition and other necessary headers
 #pragma once

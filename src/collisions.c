@@ -107,10 +107,6 @@ PointIntersect lineRect(float x1, float y_1, float x2, float y2, float rx, float
       return bottom;
    return (PointIntersect){0, 0, false};
 }
-int min()
-{
-   return 0;
-}
 int CheckCollisionX(Entity *ent, int index)
 {
    if (CheckColliders((Collider){ent->col.x + (ent->velocity.x * frame_time), ent->col.y, ent->col.width, ent->col.height, false, false, NULL}, Boxes[index]))

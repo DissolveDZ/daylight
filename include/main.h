@@ -1,7 +1,12 @@
 #include <stdlib.h>
 #include <stdio.h>
+#ifdef _WIN32
+#include <win/SDL2/SDL.h>
+#include <win/cglm/call.h>
+#else
 #include <SDL2/SDL.h>
 #include <cglm/call.h>
+#endif
 #include "shader.h"
 #include "texture.h"
 #include "lights.h"

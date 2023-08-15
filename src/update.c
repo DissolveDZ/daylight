@@ -3,7 +3,7 @@
 
 static inline void PlayerMovement(Player *player)
 {
-    u_int8_t *key_state = SDL_GetKeyboardState(NULL);
+    uint8_t *key_state = SDL_GetKeyboardState(NULL);
     int dir = 0;
     if (key_state[SDL_SCANCODE_A] && !key_state[SDL_SCANCODE_D])
     {
