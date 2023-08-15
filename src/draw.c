@@ -24,6 +24,8 @@ void Draw()
     // 3D
     DrawCube((vec3){1, 1.5, 0.5f}, (vec3){1, 1, 1}, (Vector3){p*20, 0, p*20});
     DrawCube((vec3){5, 2, 0.5f}, (vec3){5, 1, 1}, (Vector3){40, 40.f, 20.f});
+    DrawCube((vec3){Boxes[1].x, Boxes[1].y, 0.5f}, (vec3){Boxes[1].width, Boxes[1].height, 1}, (Vector3){0.f, 0.f, 0.f});
+    DrawCube((vec3){Boxes[2].x, Boxes[2].y, 0.5f}, (vec3){Boxes[2].width, Boxes[2].height, 1}, (Vector3){0.f, 0.f, 0.f});
 
     // UI
     DrawRectangleBasic((Rectangle){state.mouse_world.x, state.mouse_world.y, 0.25f, 0.25f, 0}, (vec4){255.f, 50.f, 50.f, 255.f});

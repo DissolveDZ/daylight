@@ -152,7 +152,7 @@ void main()
     }	  
     
     vec3 diffuse = albedo;
-    vec3 ambient = (vec3(0.1) * diffuse);
+    vec3 ambient = (vec3(0.01) * diffuse);
     vec3 color = Lo + ambient;
 
     // HDR tonemapping (Reinhard Tonemapping)
