@@ -12,4 +12,4 @@ I will also implement deferred lighting very soon
 
 ![image](https://github.com/DissolveDZ/daylight/assets/68782699/e4ff6618-0244-4ce6-805a-8ec2d054de80)
 ![image](https://github.com/DissolveDZ/daylight/assets/68782699/debeef37-9f94-4269-94f9-2cf1e50d1430)
-![image](https://github.com/DissolveDZ/daylight/assets/68782699/65b3c5d4-6af7-4096-92d1-cf7d8e742d77)
+![image](https://github.com/DissolveDZ/daylight/assets/68782699/dc7ecbf9-3c5c-42ce-9a6e-a934b2841c02)
