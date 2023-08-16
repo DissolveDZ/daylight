@@ -1,5 +1,45 @@
 #include "main.h"
 
+static inline void GBufferSetup()
+{
+    glGenFramebuffers(1, &gBuffer);
+    glBindFramebuffer(GL_FRAMEBUFFER, gBuffer);
+    glGenTextures(1, &gPosition);
+    glBindTexture(GL_TEXTURE_2D, gPosition);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, screen_width, screen_height, 0, GL_RGBA, GL_FLOAT, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, gPosition, 0);
+    // normal color buffer
+    glGenTextures(1, &gNormal);
+    glBindTexture(GL_TEXTURE_2D, gNormal);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, screen_width, screen_height, 0, GL_RGBA, GL_FLOAT, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, gNormal, 0);
+    // color + specular color buffer
+    glGenTextures(1, &gAlbedoSpec);
+    glBindTexture(GL_TEXTURE_2D, gAlbedoSpec);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, screen_width, screen_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, gAlbedoSpec, 0);
+
+    // tell OpenGL which color attachments we'll use (of this framebuffer) for rendering
+    unsigned int attachments[3] = {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2};
+    glDrawBuffers(3, attachments);
+    // create and attach depth buffer (renderbuffer)
+    unsigned int rboDepth;
+    glGenRenderbuffers(1, &rboDepth);
+    glBindRenderbuffer(GL_RENDERBUFFER, rboDepth);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, screen_width, screen_height);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rboDepth);
+    // check if framebuffer is complete
+    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+        printf("Framebuffer not complete!");
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
 void BufferSetup(unsigned int *VAO, unsigned int *VBO, float vertices[], int size, bool textured, bool normals)
 {
     glGenVertexArrays(1, VAO);
@@ -16,24 +56,27 @@ void BufferSetup(unsigned int *VAO, unsigned int *VBO, float vertices[], int siz
         glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *)(6 * sizeof(float)));
         glEnableVertexAttribArray(2);
     }
-    else if (normals)
-    {
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void *)0);
-        glEnableVertexAttribArray(0);
-        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void *)(3 * sizeof(float)));
-        glEnableVertexAttribArray(1);
-    }
-    else if (textured)
-    {
-        glEnableVertexAttribArray(0);
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *)0);
-        glEnableVertexAttribArray(1);
-        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *)(3 * sizeof(float)));
-    }
     else
     {
-        glEnableVertexAttribArray(0);
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)0);
+        if (normals)
+        {
+            glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void *)0);
+            glEnableVertexAttribArray(0);
+            glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void *)(3 * sizeof(float)));
+            glEnableVertexAttribArray(1);
+        }
+        else if (textured)
+        {
+            glEnableVertexAttribArray(0);
+            glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *)0);
+            glEnableVertexAttribArray(1);
+            glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *)(3 * sizeof(float)));
+        }
+        else
+        {
+            glEnableVertexAttribArray(0);
+            glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)0);
+        }
     }
 }
 
@@ -47,19 +90,28 @@ void Init()
     gladLoadGLLoader((GLADloadproc)SDL_GL_GetProcAddress);
     SDL_GL_SetSwapInterval(1);
     // SDL_SetRelativeMouseMode(SDL_TRUE);
-    basic = LoadShader("resources/shaders/vertex.vert", "resources/shaders/fragment.frag");
-    advanced = LoadShader("resources/shaders/normal.vert", "resources/shaders/fragment.frag");
-    color_shader = LoadShader("resources/shaders/color.vert", "resources/shaders/color.frag");
     BufferSetup(&planeVAO, &VBO, plane_vertices, sizeof(plane_vertices), true, false);
+    BufferSetup(&quadVAO, &quadVBO, quad_vertices, sizeof(quad_vertices), true, false);
     BufferSetup(&lineVAO, &lineVBO, line_vertices, sizeof(line_vertices), false, false);
     BufferSetup(&cubeVAO, &cubeVBO, cube_vertices, sizeof(cube_vertices), true, true);
     stbi_set_flip_vertically_on_load(1);
     // glEnable(GL_DEPTH_TEST);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    //glEnable(GL_CULL_FACE);
-    //glCullFace(GL_BACK);
-    //glFrontFace(GL_CCW);  
+    // glEnable(GL_CULL_FACE);
+    // glCullFace(GL_BACK);
+    // glFrontFace(GL_CCW);
+    GBufferSetup();
+    geometry_shader = LoadShader("resources/shaders/buffers.vert", "resources/shaders/buffers.frag");
+    basic = LoadShader("resources/shaders/buffers.vert", "resources/shaders/buffers.frag");
+    advanced = LoadShader("resources/shaders/normal.vert", "resources/shaders/fragment.frag");
+    color_shader = LoadShader("resources/shaders/buffers.vert", "resources/shaders/color.frag");
+
+    UseShader(advanced);
+    SetShaderInt(advanced.ID, "gPosition", 0);
+    SetShaderInt(advanced.ID, "gNormal", 1);
+    SetShaderInt(advanced.ID, "gAlbedoSpec", 2);
+
     state.fullscreen = true;
     state.recs_max = 10;
     state.recs = malloc(sizeof(unsigned int) * state.recs_max);
@@ -118,8 +170,8 @@ void Init()
     // printf("Point lights count: %d\n", light_ubo_data->point_light_count);
     //  Now update the UBO with the new data
     // UseShader(basic);
-    SetShaderInt(basic.ID, "tex", 0);
     state.player.entity.tex = LoadTexture2D("resources/vedl.png", 0, false);
+    SetShaderInt(geometry_shader.ID, "tex", state.player.entity.tex.ID);
     cube = LoadTexture2D("resources/cube.png", 0, false);
     state.player.entity.col = RecToCollider((Rectangle){0, 20, 2, 2, 0}, false, true);
     state.player.entity.floor_check = (Rectangle){state.player.entity.col.x, state.player.entity.col.y - state.player.entity.col.height / 2, state.player.entity.col.width, 0.05f};

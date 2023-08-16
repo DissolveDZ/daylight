@@ -16,9 +16,36 @@ SDL_Event window_event;
 SDL_Window *window;
 SDL_GLContext context;
 
+unsigned int gBuffer, gPosition, gNormal, gAlbedoSpec;
+
+Shader geometry_shader;
 Shader basic;
 Shader advanced;
 Shader color_shader;
+
+float quad_vertices[] = {
+    // positions        // texture Coords
+    -1.0f,
+    1.0f,
+    0.0f,
+    0.0f,
+    1.0f,
+    -1.0f,
+    -1.0f,
+    0.0f,
+    0.0f,
+    0.0f,
+    1.0f,
+    1.0f,
+    0.0f,
+    1.0f,
+    1.0f,
+    1.0f,
+    -1.0f,
+    0.0f,
+    1.0f,
+    0.0f,
+};
 
 float plane_vertices[] = {
     // positions        // texture Coords
@@ -100,6 +127,7 @@ float cube_vertices[] = {
 
 unsigned int VBO = 0;
 unsigned int planeVBO = 0, planeVAO = 0;
+unsigned int quadVBO = 0, quadVAO = 0;
 unsigned int lineVBO = 0, lineVAO = 0;
 unsigned int cubeVBO = 0, cubeVAO = 0;
 Texture tex;
@@ -290,6 +318,13 @@ Collider RecToCollider(Rectangle rec, bool rotating, bool dynamic)
     return col;
 }
 
+void DrawQuad()
+{
+    glBindVertexArray(quadVAO);
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+    glBindVertexArray(0);
+}
+
 void DrawLine(Vector2 line_start, Vector2 line_end, vec4 color)
 {
     UseShader(color_shader);
@@ -362,15 +397,14 @@ void DrawEntity(Rectangle rec)
 void DrawCube(vec3 position, vec3 scale, Vector3 rotation)
 {
     glEnable(GL_DEPTH_TEST);
-    UseShader(advanced);
+    UseShader(geometry_shader);
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, cube.ID);
-    SetShaderMat4(advanced.ID, "projection", projection);
-    SetShaderMat4(advanced.ID, "view", view);
-    SetShaderBool(advanced.ID, "use_color", false);
-    SetShaderBool(advanced.ID, "use_normals", true);
-    SetShaderVec3(advanced.ID, "view_pos", (vec3){state.camera.position.x, state.camera.position.y, state.camera.position.z});
+    SetShaderMat4(geometry_shader.ID, "projection", projection);
+    SetShaderMat4(geometry_shader.ID, "view", view);
+    SetShaderBool(geometry_shader.ID, "use_color", false);
+    SetShaderBool(geometry_shader.ID, "use_normals", true);
 
     glm_mat4_identity(model);
     mat4 temp;
@@ -399,7 +433,7 @@ void DrawCube(vec3 position, vec3 scale, Vector3 rotation)
     glm_mat4_mul(model, rotationmat, model);
     glm_scale(model, scale);
     // glm_rotate(model, glm_rad((float)SDL_GetTicks64() / 50), rotation);
-    SetShaderMat4(advanced.ID, "model", model);
+    SetShaderMat4(geometry_shader.ID, "model", model);
 
     glBindVertexArray(cubeVAO);
     glDrawArrays(GL_TRIANGLES, 0, 36);
