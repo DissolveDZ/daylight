@@ -15,10 +15,6 @@ uniform sampler2D tex;
 
 void main()
 {    
-    // store the fragment position vector in the first gbuffer texture
-    gPosition = FragPos - view_pos;
-    // also store the per-fragment normals into the gbuffer
-    gNormal = normalize(Normal);
     // and the diffuse per-fragment color
     gAlbedoSpec = vec4(1);
     if (!use_color)
@@ -27,10 +23,16 @@ void main()
             gAlbedoSpec = texture(tex, vec2(1.0 - TexCoords.x, TexCoords.y));
         else
             gAlbedoSpec = texture(tex, TexCoords);
+        if (gAlbedoSpec.a == 0.0)
+            discard;
     }
     else
     {
         gAlbedoSpec.rgb = color.rgb;
     }
+    // store the fragment position vector in the first gbuffer texture
+    gPosition = FragPos;
+    // also store the per-fragment normals into the gbuffer
+    gNormal = normalize(Normal);
     // store specular intensity in gAlbedoSpec's alpha component
 }  

@@ -15,8 +15,8 @@ uniform mat4 projection;
 
 void main()
 {
-    vec4 worldPos = model * vec4(aPos, 1.0);
-    FragPos = worldPos.xyz; 
+    vec4 viewpos = view * model * vec4(aPos, 1.0);
+    FragPos = viewpos.xyz; 
     TexCoords = aTexCoords;
     if (!use_normals)
     {
@@ -28,5 +28,5 @@ void main()
         Normal = normalMatrix * aNormal;
     }
 
-    gl_Position = projection * view * worldPos;
+    gl_Position = projection * viewpos;
 }

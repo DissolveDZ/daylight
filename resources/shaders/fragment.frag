@@ -96,9 +96,9 @@ vec3 fresnelSchlickRoughness(float cosTheta, vec3 F0, float roughness)
 vec3 CalculatePointLight(PointLight light, vec3 N, vec3 V, vec3 fragpos, vec3 albedo, vec3 F0, float roughness, float metallic)
 {
     // calculate per-light radiance
-    vec3 L = normalize(light.pos - fragpos);
+    vec3 L = normalize(light.pos - view_pos - fragpos);
     vec3 H = normalize(V + L);
-    float distance = length(light.pos - fragpos);
+    float distance = length(light.pos - view_pos - fragpos);
     float attenuation = 1.0 / (distance * distance);
     vec3 radiance = light.color * attenuation;
 
@@ -120,7 +120,7 @@ vec3 CalculatePointLight(PointLight light, vec3 N, vec3 V, vec3 fragpos, vec3 al
 void main()
 {
     vec4 texture_sampled;
-    vec3 FragPos = texture(gPosition, TexCoords).rgb + view_pos;
+    vec3 FragPos = texture(gPosition, TexCoords).rgb;
     vec3 Normal = texture(gNormal, TexCoords).rgb;
     vec3 Albedo = pow(texture(gAlbedoSpec, TexCoords).rgb, vec3(2.2));
     float Specular = texture(gAlbedoSpec, TexCoords).a;
@@ -141,11 +141,10 @@ void main()
         normal = vec3(0, 0, 1);
 
     vec3 N = normalize(Normal);
-    vec3 V = normalize(view_pos - FragPos);
+    vec3 V = normalize(-FragPos);
     vec3 F0 = vec3(0.04);
     float roughness = 0.2;
-    //if (use_normals)
-        //roughness = Albedo.r * 0.5;
+    roughness = Albedo.r * 0.5;
     float metallic = 0.0;
     F0 = mix(F0, texture_sampled.rgb, metallic);
     vec3 Lo = vec3(0.0);
@@ -166,6 +165,6 @@ void main()
     // gamma correct
     color = pow(color, vec3(1.0 / 2.2));
 
-    FragColor = vec4(color, texture(gAlbedoSpec, TexCoords).a);
+    FragColor = vec4(color, 1);
     //FragColor = vec4(vec3(point_light_count), 1.0);
 }
