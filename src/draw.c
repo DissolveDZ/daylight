@@ -4,7 +4,7 @@ float p = 0;
 void Draw()
 {
     p += frame_time;
-    glClearColor(0.25f, 0.4f, 0.3f, 1.0f);
+    glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
     glBindFramebuffer(GL_FRAMEBUFFER, gBuffer);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     vec3 temp;
@@ -12,14 +12,16 @@ void Draw()
     vec3 camera_pos = {state.camera.position.x, state.camera.position.y, state.camera.position.z};
     glm_vec3_add(camera_pos, (vec3){0, 0, -1}, temp);
     glm_lookat(camera_pos, temp, (vec3){0, 1, 0}, view);
+
     for (int i = 0; i < MAX_BUILDINGS; i++)
     {
         DrawRectangleBasic(buildings[i], buildColors[i]);
-    }
+    }   
     for (int i = 0; i < state.cur_colliders; i++)
     {
         DrawRectangleBasic((Rectangle){Boxes[i].x, Boxes[i].y, Boxes[i].width, Boxes[i].height, 0}, (vec4){125.f, 125.f, 125.f, 255.f});
     }
+
     DrawEntity((Rectangle){state.player.entity.col.x, state.player.entity.col.y, state.player.entity.col.width, state.player.entity.col.height, state.player.entity.tex.ID});
 
     // 3D
@@ -29,10 +31,10 @@ void Draw()
     DrawCube((vec3){Boxes[2].x, Boxes[2].y, 0.5f}, (vec3){Boxes[2].width, Boxes[2].height, 1}, (Vector3){0.f, 0.f, 0.f});
 
     // UI
-    // DrawRectangleBasic((Rectangle){state.mouse_world.x, state.mouse_world.y, 0.25f, 0.25f, 0}, (vec4){255.f, 50.f, 50.f, 255.f});
-    // DrawLine((Vector2){state.player.entity.col.x, state.player.entity.col.y}, state.mouse_world, (vec4){50.f, 50.f, 50.f, 255.f});
-    // DrawLine((Vector2){state.player.entity.col.x, state.player.entity.col.y}, (Vector2){state.player.entity.col.x + state.player.entity.velocity.x * frame_time * 20, state.player.entity.col.y + state.player.entity.velocity.y * frame_time * 20}, (vec4){255.f, 50.f, 50.f, 255.f});
-    // DrawRectangleBasic((Rectangle){intersectionX, intersectionY, 0.25f, 0.25f, 0}, (vec4){0.f, 0.f, 0.f, 255.f});
+    DrawRectangleBasic((Rectangle){state.mouse_world.x, state.mouse_world.y, 0.25f, 0.25f, 0}, (vec4){255.f, 50.f, 50.f, 255.f});
+    DrawLine((Vector2){state.player.entity.col.x, state.player.entity.col.y}, state.mouse_world, (vec4){50.f, 50.f, 50.f, 255.f});
+    DrawLine((Vector2){state.player.entity.col.x, state.player.entity.col.y}, (Vector2){state.player.entity.col.x + state.player.entity.velocity.x * frame_time * 20, state.player.entity.col.y + state.player.entity.velocity.y * frame_time * 20}, (vec4){255.f, 50.f, 50.f, 255.f});
+    DrawRectangleBasic((Rectangle){intersectionX, intersectionY, 0.25f, 0.25f, 0}, (vec4){0.f, 0.f, 0.f, 255.f});
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

@@ -82,7 +82,7 @@ float line_vertices[] = {
 };
 
 float cube_vertices[] = {
-    // positions          // normals           // tex coords
+    // positions          // normals           // texture coords
     -0.5f, -0.5f, -0.5f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f,
     0.5f, -0.5f, -0.5f, 0.0f, 0.0f, -1.0f, 1.0f, 0.0f,
     0.5f, 0.5f, -0.5f, 0.0f, 0.0f, -1.0f, 1.0f, 1.0f,
@@ -405,6 +405,7 @@ void DrawCube(vec3 position, vec3 scale, Vector3 rotation)
     SetShaderMat4(geometry_shader.ID, "view", view);
     SetShaderBool(geometry_shader.ID, "use_color", false);
     SetShaderBool(geometry_shader.ID, "use_normals", true);
+    SetShaderVec3(geometry_shader.ID, "view_pos", (vec3){state.camera.position.x, state.camera.position.y, state.camera.position.z});
 
     glm_mat4_identity(model);
     mat4 temp;
@@ -490,9 +491,16 @@ Vector2 GetScreenToWorld2D(Vector2 position)
 
 void OnResize(int new_width, int new_height)
 {
-    glViewport(0, 0, new_width, new_height);
     screen_width = new_width;
     screen_height = new_height;
+    glBindTexture(GL_TEXTURE_2D, gPosition);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, screen_width, screen_height, 0, GL_RGBA, GL_FLOAT, NULL);
+    glBindTexture(GL_TEXTURE_2D, gNormal);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, screen_width, screen_height, 0, GL_RGBA, GL_FLOAT, NULL);
+    glBindTexture(GL_TEXTURE_2D, gAlbedoSpec);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, screen_width, screen_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, screen_width, screen_height);
+    glViewport(0, 0, screen_width, screen_height);
     // state.camera.offset = (Vector2){screen_width / 2.0f, screen_height / 2.0f};
 }
 

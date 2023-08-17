@@ -51,10 +51,10 @@ void BufferSetup(unsigned int *VAO, unsigned int *VBO, float vertices[], int siz
     {
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *)0);
         glEnableVertexAttribArray(0);
-        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *)(3 * sizeof(float)));
-        glEnableVertexAttribArray(1);
-        glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *)(6 * sizeof(float)));
+        glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *)(3 * sizeof(float)));
         glEnableVertexAttribArray(2);
+        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *)(6 * sizeof(float)));
+        glEnableVertexAttribArray(1);
     }
     else
     {
@@ -62,8 +62,8 @@ void BufferSetup(unsigned int *VAO, unsigned int *VBO, float vertices[], int siz
         {
             glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void *)0);
             glEnableVertexAttribArray(0);
-            glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void *)(3 * sizeof(float)));
-            glEnableVertexAttribArray(1);
+            glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void *)(3 * sizeof(float)));
+            glEnableVertexAttribArray(2);
         }
         else if (textured)
         {
@@ -90,14 +90,10 @@ void Init()
     gladLoadGLLoader((GLADloadproc)SDL_GL_GetProcAddress);
     SDL_GL_SetSwapInterval(1);
     // SDL_SetRelativeMouseMode(SDL_TRUE);
-    BufferSetup(&planeVAO, &VBO, plane_vertices, sizeof(plane_vertices), true, false);
-    BufferSetup(&quadVAO, &quadVBO, quad_vertices, sizeof(quad_vertices), true, false);
-    BufferSetup(&lineVAO, &lineVBO, line_vertices, sizeof(line_vertices), false, false);
-    BufferSetup(&cubeVAO, &cubeVBO, cube_vertices, sizeof(cube_vertices), true, true);
     stbi_set_flip_vertically_on_load(1);
     // glEnable(GL_DEPTH_TEST);
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    //glEnable(GL_BLEND);
+    //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     // glEnable(GL_CULL_FACE);
     // glCullFace(GL_BACK);
     // glFrontFace(GL_CCW);
@@ -111,6 +107,11 @@ void Init()
     SetShaderInt(advanced.ID, "gPosition", 0);
     SetShaderInt(advanced.ID, "gNormal", 1);
     SetShaderInt(advanced.ID, "gAlbedoSpec", 2);
+
+    BufferSetup(&planeVAO, &VBO, plane_vertices, sizeof(plane_vertices), true, false);
+    BufferSetup(&quadVAO, &quadVBO, quad_vertices, sizeof(quad_vertices), true, false);
+    BufferSetup(&lineVAO, &lineVBO, line_vertices, sizeof(line_vertices), false, false);
+    BufferSetup(&cubeVAO, &cubeVBO, cube_vertices, sizeof(cube_vertices), true, true);
 
     state.fullscreen = true;
     state.recs_max = 10;
@@ -170,6 +171,7 @@ void Init()
     // printf("Point lights count: %d\n", light_ubo_data->point_light_count);
     //  Now update the UBO with the new data
     // UseShader(basic);
+    glActiveTexture(GL_TEXTURE0);
     state.player.entity.tex = LoadTexture2D("resources/vedl.png", 0, false);
     SetShaderInt(geometry_shader.ID, "tex", state.player.entity.tex.ID);
     cube = LoadTexture2D("resources/cube.png", 0, false);
