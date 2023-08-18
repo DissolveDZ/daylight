@@ -4,9 +4,9 @@ out vec4 FragColor;
 
 in vec2 TexCoords;
 
-uniform sampler2D gPosition;
-uniform sampler2D gNormal;
-uniform sampler2D gAlbedoSpec;
+uniform sampler2D g_position;
+uniform sampler2D g_normal;
+uniform sampler2D g_albedo;
 
 uniform bool flip;
 uniform bool use_normals;
@@ -117,10 +117,10 @@ vec3 CalculatePointLight(PointLight light, vec3 N, vec3 V, vec3 fragpos,
 }
 
 void main() {
-  vec4 Albedo = texture(gAlbedoSpec, TexCoords);
-  vec3 FragPos = texture(gPosition, TexCoords).rgb;
-  vec3 Normal = texture(gNormal, TexCoords).rgb;
-  float Specular = texture(gAlbedoSpec, TexCoords).a;
+  vec4 Albedo = texture(g_albedo, TexCoords);
+  vec3 FragPos = texture(g_position, TexCoords).rgb;
+  vec3 Normal = texture(g_normal, TexCoords).rgb;
+  float Specular = texture(g_albedo, TexCoords).a;
 
   // vec2 UV = gl_FragCoord.xy / resolution.xy;
   vec4 top = vec4(0.2, 0.3, 0.6, 1.0);
@@ -148,13 +148,13 @@ void main() {
     vec3 diffuse = Albedo.rgb;
     // vec3 ambient = (vec3(0.08, 0.05, 0.02) + (diffuse * vec3(0.6)));
     vec3 ambient = (diffuse * vec3(0.6));
-    color = Lo + ambient;
+    color = Lo;
 
     // HDR tonemapping (Reinhard Tonemapping)
-    const float exposure = 1;
-    color = color * (1.0 + color / (exposure * exposure)) / (1.0 + color);
+    //const float exposure = 1;
+    //color = color * (1.0 + color / (exposure * exposure)) / (1.0 + color);
     // gamma correct
-    color = pow(color, vec3(1.0 / 2.2));
+    //color = pow(color, vec3(1.0 / 2.2));
   }
   FragColor = vec4(color, 1);
 }

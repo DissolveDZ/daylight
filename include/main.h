@@ -16,10 +16,11 @@ SDL_Event window_event;
 SDL_Window *window;
 SDL_GLContext context;
 
-unsigned int gBuffer, gPosition, gNormal, gAlbedoSpec, rboDepth;
+unsigned int g_buffer, g_position, g_normal, g_albedo, post_process_FBO, post_process_color, rboDepth;
 
 Shader geometry_shader, basic, advanced,
-    color_shader, circle_shader;
+    color_shader, circle_shader, downsample_shader,
+    upsample_shader, post_process_shader;
 
 float quad_vertices[] = {
     // positions        // texture Coords
@@ -213,6 +214,19 @@ typedef struct Entity
     Rectangle floor_check;
 } Entity;
 
+typedef struct BloomMip
+{
+    vec2 size;
+    ivec2 int_size;
+    Texture texture;
+} BloomMip;
+typedef struct Bloom
+{
+    unsigned int mip_chain_len;
+    BloomMip *mip_chain;
+    unsigned int FBO;
+} Bloom;
+Bloom bloom;
 typedef struct PointIntersect
 {
     Vector2 dist;
@@ -524,12 +538,14 @@ void OnResize(int new_width, int new_height)
 {
     screen_width = new_width;
     screen_height = new_height;
-    glBindTexture(GL_TEXTURE_2D, gPosition);
+    glBindTexture(GL_TEXTURE_2D, g_position);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, screen_width, screen_height, 0, GL_RGBA, GL_FLOAT, NULL);
-    glBindTexture(GL_TEXTURE_2D, gNormal);
+    glBindTexture(GL_TEXTURE_2D, g_normal);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, screen_width, screen_height, 0, GL_RGBA, GL_FLOAT, NULL);
-    glBindTexture(GL_TEXTURE_2D, gAlbedoSpec);
+    glBindTexture(GL_TEXTURE_2D, g_albedo);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, screen_width, screen_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+    glBindTexture(GL_TEXTURE_2D, post_process_color);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, screen_width, screen_height, 0, GL_RGBA, GL_FLOAT, NULL);
     glBindRenderbuffer(GL_RENDERBUFFER, rboDepth);
     glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, screen_width, screen_height);
     glViewport(0, 0, screen_width, screen_height);

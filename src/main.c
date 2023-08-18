@@ -11,6 +11,8 @@
 #include "shader.h"
 #include "lights.h"
 #include "main.h"
+#include "buffers.c"
+#include "bloom.c"
 #include "init.c"
 #include "update.c"
 #include "draw.c"

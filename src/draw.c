@@ -1,11 +1,12 @@
 #include "main.h"
 // #include "collisions.c"
 float p = 0;
+float bloom_filter_radius = 0.005f;
 void Draw()
 {
     p += frame_time;
     glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-    glBindFramebuffer(GL_FRAMEBUFFER, gBuffer);
+    glBindFramebuffer(GL_FRAMEBUFFER, g_buffer);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     vec3 temp;
     glm_mat4_identity(view);
@@ -38,29 +39,42 @@ void Draw()
     DrawLine((Vector2){state.player.entity.col.x, state.player.entity.col.y}, (Vector2){state.player.entity.col.x + state.player.entity.velocity.x * frame_time * 20, state.player.entity.col.y + state.player.entity.velocity.y * frame_time * 20}, (vec4){255.f, 50.f, 50.f, 255.f});
     DrawRectangleBasic((Rectangle){intersectionX, intersectionY, 0.25f, 0.25f, 0}, (vec4){0.f, 0.f, 0.f, 255.f});
 
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glBindFramebuffer(GL_FRAMEBUFFER, post_process_FBO);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     UseShader(advanced);
-    SetShaderInt(advanced.ID, "gPosition", 0);
-    SetShaderInt(advanced.ID, "gNormal", 1);
-    SetShaderInt(advanced.ID, "gAlbedoSpec", 2);
+    SetShaderInt(advanced.ID, "g_position", 0);
+    SetShaderInt(advanced.ID, "g_normal", 1);
+    SetShaderInt(advanced.ID, "g_albedo", 2); // bloom.mip_chain[0].texture.ID);
     SetShaderVec2(advanced.ID, "resolution", (vec2){screen_width, screen_height});
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, gPosition);
+    glBindTexture(GL_TEXTURE_2D, g_position);
     glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_2D, gNormal);
+    glBindTexture(GL_TEXTURE_2D, g_normal);
     glActiveTexture(GL_TEXTURE2);
-    glBindTexture(GL_TEXTURE_2D, gAlbedoSpec);
+    glBindTexture(GL_TEXTURE_2D, g_albedo);
     SetShaderVec3(advanced.ID, "view_pos", (vec3){state.camera.position.x, state.camera.position.y, state.camera.position.z});
     DrawQuad();
-    glBindFramebuffer(GL_READ_FRAMEBUFFER, gBuffer);
+    RenderBloom(post_process_color, bloom_filter_radius);
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    UseShader(post_process_shader);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, post_process_color);
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, bloom.mip_chain[0].texture.ID);
+    SetShaderInt(post_process_shader.ID, "lighting", 0);
+    SetShaderInt(post_process_shader.ID, "bloom", 1);
+
+    SetShaderFloat(post_process_shader.ID, "exposure", 2.0f);
+    SetShaderFloat(post_process_shader.ID, "bloom_strength", 0.05f);
+    DrawQuad();
+
+    glBindFramebuffer(GL_READ_FRAMEBUFFER, g_buffer);
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0); // write to default framebuffer
     // blit to default framebuffer. Note that this may or may not work as the internal formats of both the FBO and default framebuffer have to match.
     // the internal formats are implementation defined. This works on all of my systems, but if it doesn't on yours you'll likely have to write to the
     // depth buffer in another shader stage (or somehow see to match the default framebuffer's internal format with the FBO's internal format).
     glBlitFramebuffer(0, 0, screen_width, screen_height, 0, 0, screen_width, screen_height, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
     // send light relevant uniforms
 
     SDL_GL_SwapWindow(window);

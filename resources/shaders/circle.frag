@@ -1,8 +1,8 @@
 #version 460 core
 
-layout (location = 0) out vec3 gPosition;
-layout (location = 1) out vec3 gNormal;
-layout (location = 2) out vec4 gAlbedoSpec;
+layout (location = 0) out vec3 g_position;
+layout (location = 1) out vec3 g_normal;
+layout (location = 2) out vec4 g_albedo;
 
 in vec2 TexCoords;
 in vec3 FragPos;
@@ -20,7 +20,7 @@ void main()
     float circle = distance *5; //smoothstep(0.0, 0.05, distance);
     if (circle <= 0.001)
         discard;
-    gAlbedoSpec = vec4(circle * color.rgb, 1);
-    gNormal = normalize(Normal);
-    gPosition = FragPos;
+    g_albedo = vec4(circle * color.rgb, 1);
+    g_normal = normalize(Normal);
+    g_position = FragPos;
 }
