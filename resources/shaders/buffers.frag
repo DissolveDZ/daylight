@@ -25,6 +25,10 @@ void main()
             gAlbedoSpec = texture(tex, TexCoords);
         if (gAlbedoSpec.a == 0.0)
             discard;
+        if (!use_color)
+        {
+            gAlbedoSpec.rgb = pow(gAlbedoSpec.rgb, vec3(2.2));
+        }
     }
     else
     {

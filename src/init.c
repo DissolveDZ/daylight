@@ -29,7 +29,6 @@ static inline void GBufferSetup()
     unsigned int attachments[3] = {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2};
     glDrawBuffers(3, attachments);
     // create and attach depth buffer (renderbuffer)
-    unsigned int rboDepth;
     glGenRenderbuffers(1, &rboDepth);
     glBindRenderbuffer(GL_RENDERBUFFER, rboDepth);
     glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, screen_width, screen_height);
@@ -84,6 +83,7 @@ void Init()
 {
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 6);
+    // SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES,16);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
     window = SDL_CreateWindow("Wedoe Wonder", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, screen_width, screen_height, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_FULLSCREEN_DESKTOP);
     context = SDL_GL_CreateContext(window);
@@ -91,10 +91,11 @@ void Init()
     SDL_GL_SetSwapInterval(1);
     // SDL_SetRelativeMouseMode(SDL_TRUE);
     stbi_set_flip_vertically_on_load(1);
+    // glEnable(GL_MULTISAMPLE);
     // glEnable(GL_DEPTH_TEST);
-    //glEnable(GL_BLEND);
-    //glEnable(GL_ALPHA_TEST);
-    //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    // glEnable(GL_BLEND);
+    // glEnable(GL_ALPHA_TEST);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     // glEnable(GL_CULL_FACE);
     // glCullFace(GL_BACK);
     // glFrontFace(GL_CCW);
@@ -103,6 +104,7 @@ void Init()
     basic = LoadShader("resources/shaders/buffers.vert", "resources/shaders/buffers.frag");
     advanced = LoadShader("resources/shaders/normal.vert", "resources/shaders/fragment.frag");
     color_shader = LoadShader("resources/shaders/buffers.vert", "resources/shaders/color.frag");
+    circle_shader = LoadShader("resources/shaders/buffers.vert", "resources/shaders/circle.frag");
 
     UseShader(advanced);
     SetShaderInt(advanced.ID, "gPosition", 0);
@@ -130,9 +132,9 @@ void Init()
         buildings[i].y = buildings[i].height / 2;
         buildings[i].x = -400.0f + buildings[i].width / 2 + spacing;
         spacing += buildings[i].width;
-        buildColors[i][0] = GetRandomValue(200, 240);
-        buildColors[i][1] = GetRandomValue(200, 240);
-        buildColors[i][2] = GetRandomValue(200, 250);
+        buildColors[i][0] = GetRandomValue(100, 255);
+        buildColors[i][1] = GetRandomValue(100, 255);
+        buildColors[i][2] = GetRandomValue(100, 255); // GetRandomValue(100, 250);
         buildColors[i][3] = 255;
     }
     state.player.entity.speed = 20;
@@ -159,6 +161,10 @@ void Init()
 
     InitLights();
     pight = CreatePointLight((vec3){0, 0, 1}, (vec3){2, 2, 2}, (vec3){0.1f, 0.1f, 0.1f}, 1, 1);
+    PointLight *dr = CreatePointLight((vec3){0, 1, 1}, (vec3){1, 0.7, 0.2}, (vec3){0.1f, 0.1f, 0.1f}, 3.4f, 1.2f);
+    PointLight *v = CreatePointLight((vec3){0, 4, 1}, (vec3){1, 0.7, 0.2}, (vec3){0.1f, 0.1f, 0.1f}, 3.4f, 1.2f);
+    PointLight *f = CreatePointLight((vec3){0, 8, 1}, (vec3){1, 0.7, 0.2}, (vec3){0.1f, 0.1f, 0.1f}, 3.4f, 1.2f);
+    /*
     PointLight *leight = CreatePointLight((vec3){5, 2, 2}, (vec3){1, 1, 1}, (vec3){0.1f, 0.1f, 0.1f}, 3.4f, 1.2f);
     PointLight *dr = CreatePointLight((vec3){0, 1, 1}, (vec3){1, 0.7, 0.2}, (vec3){0.1f, 0.1f, 0.1f}, 3.4f, 1.2f);
     PointLight *v = CreatePointLight((vec3){0, 4, 1}, (vec3){1, 0.7, 0.2}, (vec3){0.1f, 0.1f, 0.1f}, 3.4f, 1.2f);
@@ -168,6 +174,7 @@ void Init()
     PointLight *ach = CreatePointLight((vec3){Boxes[2].x, Boxes[2].y, 2}, (vec3){2, 1.7, 1.2}, (vec3){0.1f, 0.1f, 0.1f}, 3.4f, 1.2f);
     PointLight *neu = CreatePointLight((vec3){Boxes[2].x, 3, 1}, (vec3){2, 1.7, 1.2}, (vec3){0.1f, 0.1f, 0.1f}, 3.4f, 1.2f);
     PointLight *zeh = CreatePointLight((vec3){-1, 0, 1}, (vec3){1, 0.7, 0.2}, (vec3){0.1f, 0.1f, 0.1f}, 5.0f, 1.2f);
+    */
     // point = CreatePointLight((vec3){0, 0, 1}, (vec3){1, 1, 1}, (vec3){0.1f, 0.1f, 0.1f}, 1);
     // printf("Point lights count: %d\n", light_ubo_data->point_light_count);
     //  Now update the UBO with the new data

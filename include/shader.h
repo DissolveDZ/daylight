@@ -84,6 +84,10 @@ static inline void SetShaderMat4(int Shader_ID, const char *name, mat4 matrix)
 {
     glUniformMatrix4fv(glGetUniformLocation(Shader_ID, name), 1, GL_FALSE, matrix);
 }
+static inline void SetShaderVec2(int Shader_ID, const char *name, vec2 vector)
+{
+    glUniform2f(glGetUniformLocation(Shader_ID, name), vector[0], vector[1]);
+}
 static inline void SetShaderVec3(int Shader_ID, const char *name, vec3 vector)
 {
     glUniform3f(glGetUniformLocation(Shader_ID, name), vector[0], vector[1], vector[2]);

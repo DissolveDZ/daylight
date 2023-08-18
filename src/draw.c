@@ -12,14 +12,16 @@ void Draw()
     vec3 camera_pos = {state.camera.position.x, state.camera.position.y, state.camera.position.z};
     glm_vec3_add(camera_pos, (vec3){0, 0, -1}, temp);
     glm_lookat(camera_pos, temp, (vec3){0, 1, 0}, view);
+    // Sun
+    DrawCircle((vec3){state.camera.position.x - 1.5f, state.camera.position.y + 1.f, state.camera.position.z - 5}, 0.5f, (vec4){255.f * 3, 255.f * 3, 255.f * 3, 255.f});
 
     for (int i = 0; i < MAX_BUILDINGS; i++)
     {
         DrawRectangleBasic(buildings[i], buildColors[i]);
-    }   
+    }
     for (int i = 0; i < state.cur_colliders; i++)
     {
-        DrawRectangleBasic((Rectangle){Boxes[i].x, Boxes[i].y, Boxes[i].width, Boxes[i].height, 0}, (vec4){125.f, 125.f, 125.f, 255.f});
+        DrawRectangleBasic((Rectangle){Boxes[i].x, Boxes[i].y, Boxes[i].width, Boxes[i].height, 0}, (vec4){50.f, 180.f, 50.f, 255.f});
     }
 
     DrawEntity((Rectangle){state.player.entity.col.x, state.player.entity.col.y, state.player.entity.col.width, state.player.entity.col.height, state.player.entity.tex.ID});
@@ -38,11 +40,11 @@ void Draw()
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    
     UseShader(advanced);
     SetShaderInt(advanced.ID, "gPosition", 0);
     SetShaderInt(advanced.ID, "gNormal", 1);
     SetShaderInt(advanced.ID, "gAlbedoSpec", 2);
+    SetShaderVec2(advanced.ID, "resolution", (vec2){screen_width, screen_height});
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, gPosition);
     glActiveTexture(GL_TEXTURE1);
@@ -51,7 +53,6 @@ void Draw()
     glBindTexture(GL_TEXTURE_2D, gAlbedoSpec);
     SetShaderVec3(advanced.ID, "view_pos", (vec3){state.camera.position.x, state.camera.position.y, state.camera.position.z});
     DrawQuad();
-
     glBindFramebuffer(GL_READ_FRAMEBUFFER, gBuffer);
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0); // write to default framebuffer
     // blit to default framebuffer. Note that this may or may not work as the internal formats of both the FBO and default framebuffer have to match.

@@ -16,12 +16,10 @@ SDL_Event window_event;
 SDL_Window *window;
 SDL_GLContext context;
 
-unsigned int gBuffer, gPosition, gNormal, gAlbedoSpec;
+unsigned int gBuffer, gPosition, gNormal, gAlbedoSpec, rboDepth;
 
-Shader geometry_shader;
-Shader basic;
-Shader advanced;
-Shader color_shader;
+Shader geometry_shader, basic, advanced,
+    color_shader, circle_shader;
 
 float quad_vertices[] = {
     // positions        // texture Coords
@@ -332,6 +330,8 @@ void DrawLine(Vector2 line_start, Vector2 line_end, vec4 color)
     SetShaderMat4(color_shader.ID, "projection", projection);
     SetShaderMat4(color_shader.ID, "view", view);
     SetShaderVec4(color_shader.ID, "color", (vec4){color[0] / 255, color[1] / 255, color[2] / 255, color[3] / 255});
+    SetShaderFloat(color_shader.ID, "exposure", 1);
+    SetShaderBool(color_shader.ID, "hdr", true);
     glBindBuffer(GL_ARRAY_BUFFER, lineVBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(line_vertices), line_vertices, GL_STATIC_DRAW);
     glm_mat4_identity(model);
@@ -360,6 +360,8 @@ void DrawRectangleBasic(Rectangle rec, vec4 color)
     SetShaderBool(basic.ID, "use_color", true);
     SetShaderBool(basic.ID, "use_normals", false);
     SetShaderVec4(basic.ID, "color", (vec4){color[0] / 255, color[1] / 255, color[2] / 255, color[3] / 255});
+    SetShaderFloat(basic.ID, "exposure", 1);
+    SetShaderBool(basic.ID, "hdr", true);
 
     glm_mat4_identity(model);
     glm_translate(model, (vec3){rec.x, rec.y, 0.0f});
@@ -383,6 +385,8 @@ void DrawEntity(Rectangle rec)
     SetShaderBool(basic.ID, "use_normals", false);
     SetShaderVec3(basic.ID, "view_pos", (vec3){state.camera.position.x, state.camera.position.y, state.camera.position.z});
     SetShaderBool(basic.ID, "flip", state.player.entity.flip);
+    SetShaderFloat(basic.ID, "exposure", 1);
+    SetShaderBool(basic.ID, "hdr", true);
 
     glm_mat4_identity(model);
     glm_translate(model, (vec3){rec.x, rec.y, 0.0f});
@@ -406,6 +410,8 @@ void DrawCube(vec3 position, vec3 scale, Vector3 rotation)
     SetShaderBool(geometry_shader.ID, "use_color", false);
     SetShaderBool(geometry_shader.ID, "use_normals", true);
     SetShaderVec3(geometry_shader.ID, "view_pos", (vec3){state.camera.position.x, state.camera.position.y, state.camera.position.z});
+    SetShaderFloat(geometry_shader.ID, "exposure", 1);
+    SetShaderBool(geometry_shader.ID, "hdr", true);
 
     glm_mat4_identity(model);
     mat4 temp;
@@ -455,6 +461,8 @@ void DrawRectangle(Rectangle rec)
     SetShaderBool(basic.ID, "use_color", false);
     SetShaderBool(basic.ID, "use_normals", false);
     SetShaderVec3(basic.ID, "view_pos", (vec3){state.camera.position.x, state.camera.position.y, state.camera.position.z});
+    SetShaderFloat(basic.ID, "exposure", 1);
+    SetShaderBool(basic.ID, "hdr", true);
 
     glm_mat4_identity(model);
     glm_translate(model, (vec3){rec.x, rec.y, 0.0f});
@@ -465,6 +473,29 @@ void DrawRectangle(Rectangle rec)
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
     glBindVertexArray(0);
 }
+
+// Draw a circle to a quad
+void DrawCircle(vec3 position, float radius, vec4 color)
+{
+    UseShader(circle_shader);
+
+    SetShaderMat4(circle_shader.ID, "projection", projection);
+    SetShaderMat4(circle_shader.ID, "view", view);
+    glm_mat4_identity(model);
+    glm_translate(model, position);
+    glm_scale(model, (vec3){radius, radius, 1});
+    SetShaderMat4(circle_shader.ID, "model", model);
+    SetShaderVec3(circle_shader.ID, "view_pos", (vec3){state.camera.position.x, state.camera.position.y, state.camera.position.z});
+    SetShaderFloat(circle_shader.ID, "edge_blur", 0.05f);
+    SetShaderVec4(circle_shader.ID, "color", (vec4){color[0] / 255, color[1] / 255, color[2] / 255, color[3] / 255});
+    SetShaderVec2(circle_shader.ID, "center", (vec2){position[0], position[1]});
+    SetShaderFloat(circle_shader.ID, "radius", radius);
+
+    glBindVertexArray(planeVAO);
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+    glBindVertexArray(0);
+}
+
 Vector3 Vector3Transform(vec3 v, mat4 mat)
 {
     Vector3 result;
@@ -499,9 +530,9 @@ void OnResize(int new_width, int new_height)
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, screen_width, screen_height, 0, GL_RGBA, GL_FLOAT, NULL);
     glBindTexture(GL_TEXTURE_2D, gAlbedoSpec);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, screen_width, screen_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+    glBindRenderbuffer(GL_RENDERBUFFER, rboDepth);
     glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, screen_width, screen_height);
     glViewport(0, 0, screen_width, screen_height);
-    // state.camera.offset = (Vector2){screen_width / 2.0f, screen_height / 2.0f};
 }
 
 /*
