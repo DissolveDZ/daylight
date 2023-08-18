@@ -1,7 +1,7 @@
 #include "main.h"
 // #include "collisions.c"
 float p = 0;
-float bloom_filter_radius = 0.005f;
+float bloom_filter_radius = 0.004f;
 void Draw()
 {
     p += frame_time;
@@ -13,8 +13,9 @@ void Draw()
     vec3 camera_pos = {state.camera.position.x, state.camera.position.y, state.camera.position.z};
     glm_vec3_add(camera_pos, (vec3){0, 0, -1}, temp);
     glm_lookat(camera_pos, temp, (vec3){0, 1, 0}, view);
+
     // Sun
-    DrawCircle((vec3){state.camera.position.x - 1.5f, state.camera.position.y + 1.f, state.camera.position.z - 5}, 0.5f, (vec4){255.f * 3, 255.f * 3, 255.f * 3, 255.f});
+    DrawCircle((vec3){state.camera.position.x - 1.5f, state.camera.position.y + 1.f, state.camera.position.z - 5}, 0.5f, (vec4){255.f * 10, 255.f * 10, 255.f * 10, 255.f});
 
     for (int i = 0; i < MAX_BUILDINGS; i++)
     {
@@ -60,21 +61,25 @@ void Draw()
     UseShader(post_process_shader);
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, post_process_color);
+    if (true)
+    {
+        glGenerateMipmap(GL_TEXTURE_2D); // Generate mipmaps every frame
+        vec3 luminescence;
+        glGetTexImage(GL_TEXTURE_2D, 10, GL_RGB, GL_FLOAT, &luminescence);                                // Read the value from the lowest mip level
+        const float lum = 0.2126f * luminescence[0] + 0.7152f * luminescence[1] + 0.0722f * luminescence[2]; // Calculate a weighted average
+
+        const float adjSpeed = 0.05f;
+        scene_exposure = lerp(scene_exposure, 0.5f / lum * 1.f, adjSpeed); // Gradually adjust the exposure
+        scene_exposure = clamp(scene_exposure, 0.1f, 2.f);  // Don't let it go over or under a specified min/max range
+    }
     glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_2D, bloom.mip_chain[0].texture.ID);
     SetShaderInt(post_process_shader.ID, "lighting", 0);
     SetShaderInt(post_process_shader.ID, "bloom", 1);
 
-    SetShaderFloat(post_process_shader.ID, "exposure", 2.0f);
+    SetShaderFloat(post_process_shader.ID, "exposure", 1.0f);
     SetShaderFloat(post_process_shader.ID, "bloom_strength", 0.05f);
     DrawQuad();
-
-    glBindFramebuffer(GL_READ_FRAMEBUFFER, g_buffer);
-    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0); // write to default framebuffer
-    // blit to default framebuffer. Note that this may or may not work as the internal formats of both the FBO and default framebuffer have to match.
-    // the internal formats are implementation defined. This works on all of my systems, but if it doesn't on yours you'll likely have to write to the
-    // depth buffer in another shader stage (or somehow see to match the default framebuffer's internal format with the FBO's internal format).
-    glBlitFramebuffer(0, 0, screen_width, screen_height, 0, 0, screen_width, screen_height, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
     // send light relevant uniforms
 
     SDL_GL_SwapWindow(window);

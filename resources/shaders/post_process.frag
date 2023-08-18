@@ -15,7 +15,8 @@ vec3 color = mix(hdr_color, bloom_color, bloom_strength);
 
 void main()
 {
-    color = vec3(1.0) - exp(-color * exposure);
+    //color = vec3(1.0) - exp(-color * exposure);
+    color = color * (1.0 + color / (exposure * exposure)) / (1.0 + color);
     color = pow(color, vec3(1.0 / 2.2));
     FragColor = vec4(color, 1.0);
 }

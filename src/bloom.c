@@ -9,10 +9,13 @@ void BloomInit(int mip_amount)
         mip_amount = MAX_BLOOM_MIP;
     vec2 mip_size = {(float)screen_width, (float)screen_height};
     ivec2 mip_int_size = {(int)screen_width, (int)screen_height};
-    if (screen_width > (unsigned int)INT_MAX || screen_height > (unsigned int)INT_MAX) {
-		printf("Window size conversion overflow - cannot build bloom FBO!");
-		return false;
-	}
+    if (screen_width > (unsigned int)INT_MAX || screen_height > (unsigned int)INT_MAX)
+    {
+        printf("Window size conversion overflow - cannot build bloom FBO!");
+        return false;
+    }
+    bloom.enabled = true;
+    bloom.karis_average = true;
     bloom.mip_chain_len += mip_amount;
     bloom.mip_chain = malloc(sizeof(BloomMip) * bloom.mip_chain_len);
     for (unsigned int i = 0; i < mip_amount; i++)
@@ -74,7 +77,7 @@ void UpsampleBloom(float filter_radius)
     for (int i = (int)bloom.mip_chain_len - 1; i > 0; i--)
     {
         const BloomMip *mip = &bloom.mip_chain[i];
-        const BloomMip *next_mip = &bloom.mip_chain[i-1];
+        const BloomMip *next_mip = &bloom.mip_chain[i - 1];
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, mip->texture.ID);
 
@@ -94,6 +97,10 @@ void DownSampleBloom(unsigned int src_texture)
 {
     UseShader(downsample_shader);
     SetShaderVec2(downsample_shader.ID, "src_resolution", (vec2){(float)screen_width, (float)screen_height});
+    if (bloom.karis_average)
+    {
+        SetShaderInt(downsample_shader.ID, "mip_level", 0);
+    }
 
     // Bind srcTexture (HDR color buffer) as initial texture input
     glActiveTexture(GL_TEXTURE0);
@@ -116,7 +123,12 @@ void DownSampleBloom(unsigned int src_texture)
         SetShaderVec2(downsample_shader.ID, "src_resolution", mip->size);
         // Set current mip as texture input for next iteration
         glBindTexture(GL_TEXTURE_2D, mip->texture.ID);
+        if (i == 0)
+        {
+            SetShaderInt(downsample_shader.ID, "mip_level", 1);
+        }
     }
+    glUseProgram(0);
 }
 
 void RenderBloom(unsigned int src_texture, float filter_radius)

@@ -139,7 +139,8 @@ void main() {
   // ambient
   vec3 color;
   if (FragPos == vec3(1)) {
-    color = mix(bottom, top, ((view_pos.y + gl_FragCoord.y) / resolution.y)).rgb;
+    color = vec3(0);
+    //color = mix(bottom, top, ((view_pos.y + gl_FragCoord.y) / resolution.y)).rgb;
   } else {
     for (int i = 0; i < point_light_count; ++i) {
       Lo += CalculatePointLight(point_lights[i], N, V, FragPos, Albedo.rgb, F0,
@@ -148,7 +149,7 @@ void main() {
     vec3 diffuse = Albedo.rgb;
     // vec3 ambient = (vec3(0.08, 0.05, 0.02) + (diffuse * vec3(0.6)));
     vec3 ambient = (diffuse * vec3(0.6));
-    color = Lo;
+    color = Lo + ambient;
 
     // HDR tonemapping (Reinhard Tonemapping)
     //const float exposure = 1;

@@ -20,7 +20,7 @@ void Init()
     // glEnable(GL_CULL_FACE);
     // glCullFace(GL_BACK);
     // glFrontFace(GL_CCW);
-    BloomInit(5);
+    BloomInit(6);
     PostProcessBuffer();
     GBufferSetup();
     geometry_shader = LoadShader("resources/shaders/buffers.vert", "resources/shaders/buffers.frag");
@@ -88,7 +88,7 @@ void Init()
     // Boxes[6] = RecToCollider((Rectangle){800, 225, 200, 5}, true, false);
 
     InitLights();
-    pight = CreatePointLight((vec3){0, 0, 1}, (vec3){2, 2, 2}, (vec3){0.1f, 0.1f, 0.1f}, 1, 1);
+    pight = CreatePointLight((vec3){0, 0, 1}, (vec3){4, 4, 4}, (vec3){0.1f, 0.1f, 0.1f}, 1, 1);
     PointLight *dr = CreatePointLight((vec3){0, 1, 1}, (vec3){1, 0.7, 0.2}, (vec3){0.1f, 0.1f, 0.1f}, 3.4f, 1.2f);
     PointLight *v = CreatePointLight((vec3){0, 4, 1}, (vec3){1, 0.7, 0.2}, (vec3){0.1f, 0.1f, 0.1f}, 3.4f, 1.2f);
     PointLight *f = CreatePointLight((vec3){0, 8, 1}, (vec3){1, 0.7, 0.2}, (vec3){0.1f, 0.1f, 0.1f}, 3.4f, 1.2f);

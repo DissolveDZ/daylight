@@ -17,7 +17,7 @@ SDL_Window *window;
 SDL_GLContext context;
 
 unsigned int g_buffer, g_position, g_normal, g_albedo, post_process_FBO, post_process_color, rboDepth;
-
+float scene_exposure = 1;
 Shader geometry_shader, basic, advanced,
     color_shader, circle_shader, downsample_shader,
     upsample_shader, post_process_shader;
@@ -225,6 +225,8 @@ typedef struct Bloom
     unsigned int mip_chain_len;
     BloomMip *mip_chain;
     unsigned int FBO;
+    bool karis_average;
+    bool enabled;
 } Bloom;
 Bloom bloom;
 typedef struct PointIntersect
@@ -536,6 +538,11 @@ Vector2 GetScreenToWorld2D(Vector2 position)
 
 void OnResize(int new_width, int new_height)
 {
+    if (new_width > (int)INT_MAX || new_height > (int)INT_MAX)
+    {
+        printf("Window size overflow");
+        return false;
+    }
     screen_width = new_width;
     screen_height = new_height;
     glBindTexture(GL_TEXTURE_2D, g_position);
@@ -549,6 +556,24 @@ void OnResize(int new_width, int new_height)
     glBindRenderbuffer(GL_RENDERBUFFER, rboDepth);
     glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, screen_width, screen_height);
     glViewport(0, 0, screen_width, screen_height);
+    if (bloom.enabled)
+    {
+        vec2 mip_size = {(float)screen_width, (float)screen_height};
+        ivec2 mip_int_size = {(int)screen_width, (int)screen_height};
+        for (unsigned int i = 0; i < bloom.mip_chain_len; i++)
+        {
+            BloomMip *mip = &bloom.mip_chain[i];
+            glm_vec2_mul(mip_size, (vec2){0.5f, 0.5f}, mip_size);
+            glm_vec2_div(mip_int_size, (ivec2){2, 2}, mip_int_size);
+            glm_vec2_copy(mip_size, mip->size);
+            glm_ivec2_copy(mip_int_size, mip->int_size);
+            glBindTexture(GL_TEXTURE_2D, mip->texture.ID);
+            // we are downscaling an HDR color buffer, so we need a float texture format
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_R11F_G11F_B10F,
+                         (int)mip_size[0], (int)mip_size[1],
+                         0, GL_RGB, GL_FLOAT, NULL);
+        }
+    }
 }
 
 /*
