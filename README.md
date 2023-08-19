@@ -10,6 +10,6 @@ My goal is to make a game that runs on a stable 60 fps on the steam deck while m
 
 I will also implement deferred lighting very soon
 
-![image](https://github.com/DissolveDZ/daylight/assets/68782699/e4ff6618-0244-4ce6-805a-8ec2d054de80)
+![image](https://github.com/DissolveDZ/daylight/assets/68782699/491c5bd4-4f13-4cbf-b2bd-75e5c68a6ee3)
 ![image](https://github.com/DissolveDZ/daylight/assets/68782699/debeef37-9f94-4269-94f9-2cf1e50d1430)
 ![image](https://github.com/DissolveDZ/daylight/assets/68782699/dc7ecbf9-3c5c-42ce-9a6e-a934b2841c02)
