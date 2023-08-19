@@ -130,7 +130,7 @@ void main() {
   vec3 V = normalize(-FragPos);
 
   float roughness = 0.2;
-  //roughness = Albedo.r * 0.5;
+  roughness = Albedo.r * 0.5;
   float metallic = 0.0;
 
   vec3 F0 = vec3(0.04);
@@ -139,8 +139,7 @@ void main() {
   // ambient
   vec3 color;
   if (FragPos == vec3(1)) {
-    color = vec3(0);
-    //color = mix(bottom, top, ((view_pos.y + gl_FragCoord.y) / resolution.y)).rgb;
+    color = mix(bottom, top, ((view_pos.y + gl_FragCoord.y) / resolution.y)).rgb;
   } else {
     for (int i = 0; i < point_light_count; ++i) {
       Lo += CalculatePointLight(point_lights[i], N, V, FragPos, Albedo.rgb, F0,

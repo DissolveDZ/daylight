@@ -16,6 +16,12 @@ uniform vec2 src_resolution;
 // which mip we are writing to, used for Karis average
 uniform int mip_level = 1;
 
+const float epsilon = 1.0e-4;
+// vec2 knee = vec2(0, 1);
+float knee = 1.0;
+float threshold = 1.0;
+vec4 Curve = vec4(threshold, threshold - knee, knee * 2.0, knee * 0.25);
+
 in vec2 TexCoords;
 layout (location = 0) out vec3 downsample;
 
@@ -40,6 +46,21 @@ float KarisAverage(vec3 col)
 	return 1.0f / (1.0f + luma);
 }
 
+vec3 quadratic_threshold(vec3 color, float threshold, vec3 curve)
+{
+	// Pixel brightness
+    float br = max(color.r, max(color.g, color.b));
+
+    // Under-threshold part: quadratic curve
+    float rq = clamp(br - curve.x, 0.0, curve.y);
+    rq = curve.z * rq * rq;
+
+    // Combine and apply the brightness response curve.
+    color *= max(rq, br - threshold) / max(br, epsilon);
+
+    return color;
+}
+
 // NOTE: This is the readable version of this shader. It will be optimized!
 void main()
 {
@@ -54,6 +75,7 @@ void main()
 	// - l - m -
 	// g - h - i
 	// === ('e' is the current texel) ===
+
 	vec3 a = texture(src_texture, vec2(TexCoords.x - 2*x, TexCoords.y + 2*y)).rgb;
 	vec3 b = texture(src_texture, vec2(TexCoords.x,       TexCoords.y + 2*y)).rgb;
 	vec3 c = texture(src_texture, vec2(TexCoords.x + 2*x, TexCoords.y + 2*y)).rgb;
@@ -105,6 +127,7 @@ void main()
 	  groups[4] *= KarisAverage(groups[4]);
 	  downsample = groups[0]+groups[1]+groups[2]+groups[3]+groups[4];
 	  downsample = max(downsample, 0.0001f);
+	  downsample = quadratic_threshold(texture(src_texture, TexCoords).rgb, Curve.x, Curve.yzw);
 	  break;
 	default:
 	  downsample = e*0.125;                // ok

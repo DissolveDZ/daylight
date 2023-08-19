@@ -31,8 +31,8 @@ void Draw()
     // 3D
     DrawCube((vec3){1, 1.5, 0.5f}, (vec3){1, 1, 1}, (Vector3){p * 20, 0, p * 20});
     DrawCube((vec3){5, 2, 0.5f}, (vec3){5, 1, 1}, (Vector3){40, 40.f, 20.f});
-    DrawCube((vec3){Boxes[1].x, Boxes[1].y, 0.5f}, (vec3){Boxes[1].width, Boxes[1].height, 1}, (Vector3){0.f, 0.f, 0.f});
-    DrawCube((vec3){Boxes[2].x, Boxes[2].y, 0.5f}, (vec3){Boxes[2].width, Boxes[2].height, 1}, (Vector3){0.f, 0.f, 0.f});
+    // DrawCube((vec3){Boxes[1].x, Boxes[1].y, 0.5f}, (vec3){Boxes[1].width, Boxes[1].height, 1}, (Vector3){0.f, 0.f, 0.f});
+    // DrawCube((vec3){Boxes[2].x, Boxes[2].y, 0.5f}, (vec3){Boxes[2].width, Boxes[2].height, 1}, (Vector3){0.f, 0.f, 0.f});
 
     // UI
     DrawRectangleBasic((Rectangle){state.mouse_world.x, state.mouse_world.y, 0.25f, 0.25f, 0}, (vec4){255.f, 50.f, 50.f, 255.f});
@@ -61,24 +61,24 @@ void Draw()
     UseShader(post_process_shader);
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, post_process_color);
-    if (true)
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, bloom.mip_chain[0].texture.ID);
+    if (false)
     {
         glGenerateMipmap(GL_TEXTURE_2D); // Generate mipmaps every frame
         vec3 luminescence;
-        glGetTexImage(GL_TEXTURE_2D, 10, GL_RGB, GL_FLOAT, &luminescence);                                // Read the value from the lowest mip level
+        glGetTexImage(GL_TEXTURE_2D, 10, GL_RGB, GL_FLOAT, &luminescence);                                   // Read the value from the lowest mip level
         const float lum = 0.2126f * luminescence[0] + 0.7152f * luminescence[1] + 0.0722f * luminescence[2]; // Calculate a weighted average
 
-        const float adjSpeed = 0.05f;
-        scene_exposure = lerp(scene_exposure, 0.5f / lum * 1.f, adjSpeed); // Gradually adjust the exposure
-        scene_exposure = clamp(scene_exposure, 0.1f, 2.f);  // Don't let it go over or under a specified min/max range
+        const float adjSpeed = 2.5f;
+        scene_exposure = glm_lerp(scene_exposure, 0.5f / lum * 1.f, adjSpeed * frame_time); // Gradually adjust the exposure
+        scene_exposure = glm_clamp(scene_exposure, 0.01f, 4.f);                             // Don't let it go over or under a specified min/max range
     }
-    glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_2D, bloom.mip_chain[0].texture.ID);
     SetShaderInt(post_process_shader.ID, "lighting", 0);
     SetShaderInt(post_process_shader.ID, "bloom", 1);
 
-    SetShaderFloat(post_process_shader.ID, "exposure", 1.0f);
-    SetShaderFloat(post_process_shader.ID, "bloom_strength", 0.05f);
+    SetShaderFloat(post_process_shader.ID, "exposure", 1.0); //1.0f - (scene_exposure-4));
+    SetShaderFloat(post_process_shader.ID, "bloom_strength",  0.05f); //scene_exposure/2 * 0.05f);
     DrawQuad();
     // send light relevant uniforms
 
