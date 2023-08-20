@@ -18,8 +18,8 @@ uniform int mip_level = 1;
 
 const float epsilon = 1.0e-4;
 // vec2 knee = vec2(0, 1);
-float knee = 1.0;
-float threshold = 1.0;
+uniform float knee = 1.0;
+uniform float threshold = 1.0;
 vec4 Curve = vec4(threshold, threshold - knee, knee * 2.0, knee * 0.25);
 
 in vec2 TexCoords;
@@ -126,8 +126,9 @@ void main()
 	  groups[3] *= KarisAverage(groups[3]);
 	  groups[4] *= KarisAverage(groups[4]);
 	  downsample = groups[0]+groups[1]+groups[2]+groups[3]+groups[4];
+	  if (threshold != 0.0)
+	  	downsample = quadratic_threshold(texture(src_texture, TexCoords).rgb, Curve.x, Curve.yzw);
 	  downsample = max(downsample, 0.0001f);
-	  downsample = quadratic_threshold(texture(src_texture, TexCoords).rgb, Curve.x, Curve.yzw);
 	  break;
 	default:
 	  downsample = e*0.125;                // ok

@@ -6,10 +6,10 @@ void Init()
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 6);
     // SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES,16);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
-    window = SDL_CreateWindow("Wedoe Wonder", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, screen_width, screen_height, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_FULLSCREEN_DESKTOP); // 
+    window = SDL_CreateWindow("Wedoe Wonder", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, screen_width, screen_height, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_FULLSCREEN_DESKTOP); //
     context = SDL_GL_CreateContext(window);
     gladLoadGLLoader((GLADloadproc)SDL_GL_GetProcAddress);
-    SDL_GL_SetSwapInterval(1);
+    SDL_GL_SetSwapInterval(0);
     // SDL_SetRelativeMouseMode(SDL_TRUE);
     stbi_set_flip_vertically_on_load(1);
     // glEnable(GL_MULTISAMPLE);
@@ -86,6 +86,11 @@ void Init()
     // Boxes[3] = RecToCollider((Rectangle){500, 225, 200, 200}, false, false);
     // Boxes[4] = RecToCollider((Rectangle){100, 275, 50, 50}, false, false);
     // Boxes[6] = RecToCollider((Rectangle){800, 225, 200, 5}, true, false);
+    glm_mat4_identity(view);
+    vec3 temp;
+    vec3 camera_pos = {state.camera.position.x, state.camera.position.y, state.camera.position.z};
+    glm_vec3_add(camera_pos, (vec3){0, 0, -1}, temp);
+    glm_lookat(camera_pos, temp, (vec3){0, 1, 0}, view);
 
     InitLights();
     pight = CreatePointLight((vec3){0, 0, 1}, (vec3){4, 4, 4}, (vec3){0.1f, 0.1f, 0.1f}, 1, 1);

@@ -15,6 +15,12 @@ vec3 color = mix(hdr_color, bloom_color, bloom_strength);
 
 void main()
 {
+    float a = 2.51f;
+    float b = 0.03f;
+    float c = 2.43f;
+    float d = 0.59f;
+    float e = 0.14f;
+    //color = clamp((color*(a*color+b))/(color*(c*color+d)+e), 0.0, 1.0);
     //color = vec3(1.0) - exp(-color * exposure);
     color = color * (1.0 + color / (exposure * exposure)) / (1.0 + color);
     color = pow(color, vec3(1.0 / 2.2));

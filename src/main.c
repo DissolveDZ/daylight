@@ -9,8 +9,8 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 #include "shader.h"
-#include "lights.h"
 #include "main.h"
+#include "lights.h"
 #include "buffers.c"
 #include "bloom.c"
 #include "init.c"

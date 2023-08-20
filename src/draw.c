@@ -15,7 +15,8 @@ void Draw()
     glm_lookat(camera_pos, temp, (vec3){0, 1, 0}, view);
 
     // Sun
-    DrawCircle((vec3){state.camera.position.x - 1.5f, state.camera.position.y + 1.f, state.camera.position.z - 5}, 0.5f, (vec4){255.f * 10, 255.f * 10, 255.f * 10, 255.f});
+
+    // DrawCircle((vec3){state.camera.position.x - 1.5f, state.camera.position.y + 1.f, state.camera.position.z - 5}, 0.5f, (vec4){255.f * 10, 255.f * 10, 255.f * 10, 255.f});
 
     for (int i = 0; i < MAX_BUILDINGS; i++)
     {
@@ -29,16 +30,20 @@ void Draw()
     DrawEntity((Rectangle){state.player.entity.col.x, state.player.entity.col.y, state.player.entity.col.width, state.player.entity.col.height, state.player.entity.tex.ID});
 
     // 3D
+
     DrawCube((vec3){1, 1.5, 0.5f}, (vec3){1, 1, 1}, (Vector3){p * 20, 0, p * 20});
     DrawCube((vec3){5, 2, 0.5f}, (vec3){5, 1, 1}, (Vector3){40, 40.f, 20.f});
     // DrawCube((vec3){Boxes[1].x, Boxes[1].y, 0.5f}, (vec3){Boxes[1].width, Boxes[1].height, 1}, (Vector3){0.f, 0.f, 0.f});
     // DrawCube((vec3){Boxes[2].x, Boxes[2].y, 0.5f}, (vec3){Boxes[2].width, Boxes[2].height, 1}, (Vector3){0.f, 0.f, 0.f});
 
     // UI
+
     DrawRectangleBasic((Rectangle){state.mouse_world.x, state.mouse_world.y, 0.25f, 0.25f, 0}, (vec4){255.f, 50.f, 50.f, 255.f});
     DrawLine((Vector2){state.player.entity.col.x, state.player.entity.col.y}, state.mouse_world, (vec4){50.f, 50.f, 50.f, 255.f});
     DrawLine((Vector2){state.player.entity.col.x, state.player.entity.col.y}, (Vector2){state.player.entity.col.x + state.player.entity.velocity.x * frame_time * 20, state.player.entity.col.y + state.player.entity.velocity.y * frame_time * 20}, (vec4){255.f, 50.f, 50.f, 255.f});
     DrawRectangleBasic((Rectangle){intersectionX, intersectionY, 0.25f, 0.25f, 0}, (vec4){0.f, 0.f, 0.f, 255.f});
+
+    // LIGHTING PASS
 
     glBindFramebuffer(GL_FRAMEBUFFER, post_process_FBO);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -55,7 +60,12 @@ void Draw()
     glBindTexture(GL_TEXTURE_2D, g_albedo);
     SetShaderVec3(advanced.ID, "view_pos", (vec3){state.camera.position.x, state.camera.position.y, state.camera.position.z});
     DrawQuad();
-    RenderBloom(post_process_color, bloom_filter_radius);
+
+    // POST PROCESS
+
+    // Bloom
+    RenderBloom(post_process_color, bloom_filter_radius, 1.0f, 1.0f);
+
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     UseShader(post_process_shader);

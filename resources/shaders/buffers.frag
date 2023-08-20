@@ -25,10 +25,7 @@ void main()
             g_albedo = texture(tex, TexCoords);
         if (g_albedo.a == 0.0)
             discard;
-        if (!use_color)
-        {
-            g_albedo.rgb = pow(g_albedo.rgb, vec3(2.2));
-        }
+        g_albedo.rgb = pow(g_albedo.rgb, vec3(2.2));
     }
     else
     {
