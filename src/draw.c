@@ -6,17 +6,20 @@ void Draw()
 {
     p += frame_time;
     glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+    glEnable(GL_STENCIL_TEST);
+    glStencilFunc(GL_ALWAYS, 1, 0xFF);
+    glStencilMask(0xFF);
     glBindFramebuffer(GL_FRAMEBUFFER, g_buffer);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+    glClearStencil(0x00);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
     vec3 temp;
     glm_mat4_identity(view);
     vec3 camera_pos = {state.camera.position.x, state.camera.position.y, state.camera.position.z};
     glm_vec3_add(camera_pos, (vec3){0, 0, -1}, temp);
     glm_lookat(camera_pos, temp, (vec3){0, 1, 0}, view);
-
     // Sun
-
-    // DrawCircle((vec3){state.camera.position.x - 1.5f, state.camera.position.y + 1.f, state.camera.position.z - 5}, 0.5f, (vec4){255.f * 10, 255.f * 10, 255.f * 10, 255.f});
+    DrawCircle((vec3){state.camera.position.x - 1.5f, state.camera.position.y + 1.f, state.camera.position.z - 5}, 0.5f, (vec4){255.f * 10, 255.f * 10, 255.f * 10, 255.f});
 
     for (int i = 0; i < MAX_BUILDINGS; i++)
     {
@@ -43,15 +46,25 @@ void Draw()
     DrawLine((Vector2){state.player.entity.col.x, state.player.entity.col.y}, (Vector2){state.player.entity.col.x + state.player.entity.velocity.x * frame_time * 20, state.player.entity.col.y + state.player.entity.velocity.y * frame_time * 20}, (vec4){255.f, 50.f, 50.f, 255.f});
     DrawRectangleBasic((Rectangle){intersectionX, intersectionY, 0.25f, 0.25f, 0}, (vec4){0.f, 0.f, 0.f, 255.f});
 
+    //glStencilFunc(GL_NEVER, 1, 0xFF);
+    glStencilMask(0x00);
+
     // LIGHTING PASS
 
     glBindFramebuffer(GL_FRAMEBUFFER, post_process_FBO);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
+    UseShader(sky_shader);
+    SetShaderVec2(sky_shader.ID, "resolution", (vec2){screen_width, screen_height});
+    SetShaderVec3(sky_shader.ID, "view_pos", (vec3){state.camera.position.x, state.camera.position.y, state.camera.position.z});
+    DrawQuad();
+
+    glStencilFunc(GL_EQUAL, 1, 0xFF);
     UseShader(advanced);
     SetShaderInt(advanced.ID, "g_position", 0);
     SetShaderInt(advanced.ID, "g_normal", 1);
-    SetShaderInt(advanced.ID, "g_albedo", 2); // bloom.mip_chain[0].texture.ID);
-    SetShaderVec2(advanced.ID, "resolution", (vec2){screen_width, screen_height});
+    SetShaderInt(advanced.ID, "g_albedo", 2);
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, g_position);
     glActiveTexture(GL_TEXTURE1);
@@ -60,6 +73,7 @@ void Draw()
     glBindTexture(GL_TEXTURE_2D, g_albedo);
     SetShaderVec3(advanced.ID, "view_pos", (vec3){state.camera.position.x, state.camera.position.y, state.camera.position.z});
     DrawQuad();
+    glDisable(GL_STENCIL_TEST);
 
     // POST PROCESS
 
@@ -87,11 +101,11 @@ void Draw()
     SetShaderInt(post_process_shader.ID, "lighting", 0);
     SetShaderInt(post_process_shader.ID, "bloom", 1);
 
-    SetShaderFloat(post_process_shader.ID, "exposure", 1.0); //1.0f - (scene_exposure-4));
-    SetShaderFloat(post_process_shader.ID, "bloom_strength",  0.05f); //scene_exposure/2 * 0.05f);
+    SetShaderFloat(post_process_shader.ID, "exposure", 1.0);         // 1.0f - (scene_exposure-4));
+    SetShaderFloat(post_process_shader.ID, "bloom_strength", 0.05f); // scene_exposure/2 * 0.05f);
     DrawQuad();
-    // send light relevant uniforms
 
+    // send light relevant uniforms
     SDL_GL_SwapWindow(window);
     /*
     DrawTextureV(water_noise, (Vector2){water.x, water.y}, WHITE);

@@ -13,7 +13,6 @@ uniform bool use_normals;
 uniform bool use_color;
 uniform vec4 color;
 uniform vec3 view_pos;
-uniform vec2 resolution;
 
 struct PointLight {
   vec3 pos;
@@ -106,8 +105,7 @@ vec3 CalculatePointLight(PointLight light, vec3 N, vec3 V, vec3 fragpos,
   vec3 F = fresnelSchlick(max(dot(H, V), 0.0), F0);
 
   vec3 numerator = NDF * G * F;
-  float denominator = 4.0 * max(dot(N, V), 0.0) * max(dot(N, L), 0.0) +
-                      0.0001; // + 0.0001 to prevent divide by zero
+  float denominator = 4.0 * max(dot(N, V), 0.0) * max(dot(N, L), 0.0) + 0.0001; // + 0.0001 to prevent divide by zero
   vec3 specular = numerator / denominator;
   vec3 kS = F;
   vec3 kD = vec3(1.0) - kS;
@@ -122,10 +120,6 @@ void main() {
   vec3 Normal = texture(g_normal, TexCoords).rgb;
   float Specular = texture(g_albedo, TexCoords).a;
 
-  // vec2 UV = gl_FragCoord.xy / resolution.xy;
-  vec4 top = vec4(0.2, 0.3, 0.6, 1.0);
-  vec4 bottom = vec4(0.7, 0.9, 1.0, 1.0);
-
   vec3 N = normalize(Normal);
   vec3 V = normalize(-FragPos);
 
@@ -138,23 +132,13 @@ void main() {
   vec3 Lo = vec3(0.0);
   // ambient
   vec3 color;
-  if (FragPos == vec3(1)) {
-    color = mix(bottom, top, ((view_pos.y + gl_FragCoord.y) / resolution.y)).rgb;
-  } else {
-    for (int i = 0; i < point_light_count; ++i) {
-      Lo += CalculatePointLight(point_lights[i], N, V, FragPos, Albedo.rgb, F0,
-                                roughness, metallic);
-    }
-    vec3 diffuse = Albedo.rgb;
-    // vec3 ambient = (vec3(0.08, 0.05, 0.02) + (diffuse * vec3(0.6)));
-    vec3 ambient = (diffuse * vec3(0.6));
-    color = Lo + ambient;
-
-    // HDR tonemapping (Reinhard Tonemapping)
-    //const float exposure = 1;
-    //color = color * (1.0 + color / (exposure * exposure)) / (1.0 + color);
-    // gamma correct
-    //color = pow(color, vec3(1.0 / 2.2));
+  for (int i = 0; i < point_light_count; ++i) 
+  {
+    Lo += CalculatePointLight(point_lights[i], N, V, FragPos, Albedo.rgb, F0, roughness, metallic);
   }
+  vec3 diffuse = Albedo.rgb;
+  // vec3 ambient = (vec3(0.08, 0.05, 0.02) + (diffuse * vec3(0.6)));
+  vec3 ambient = (diffuse * vec3(0.6));
+  color = Lo + ambient;
   FragColor = vec4(color, 1);
 }

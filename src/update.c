@@ -145,14 +145,14 @@ void ProcessInputs()
             break;
         case SDL_KEYDOWN:
             switch (window_event.key.keysym.scancode)
-                case SDL_SCANCODE_F11:
-                    state.fullscreen = !state.fullscreen;
-                    if (state.fullscreen)
-                        SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN_DESKTOP);
-                    else
-                        SDL_SetWindowFullscreen(window, SDL_WINDOW_BORDERLESS);
-                // SDL_SetWindowDisplayMode(window, SDL_WINDOW_BORDERLESS);
-                break;
+            case SDL_SCANCODE_F11:
+                state.fullscreen = !state.fullscreen;
+            if (state.fullscreen)
+                SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN_DESKTOP);
+            else
+                SDL_SetWindowFullscreen(window, SDL_WINDOW_BORDERLESS);
+            // SDL_SetWindowDisplayMode(window, SDL_WINDOW_BORDERLESS);
+            break;
             break;
         case SDL_WINDOWEVENT:
             if (window_event.window.event == SDL_WINDOWEVENT_SIZE_CHANGED)
@@ -169,10 +169,10 @@ void ProcessInputs()
 }
 void Update()
 {
+    ProcessInputs();
     last_frame = current_frame;
     current_frame = SDL_GetPerformanceCounter();
     frame_time = (double)(current_frame - last_frame) / (double)SDL_GetPerformanceFrequency();
-    ProcessInputs();
     PlayerMovement(&state.player);
     glm_mat4_identity(projection);
     if (screen_height && screen_width)

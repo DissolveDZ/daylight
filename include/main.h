@@ -20,7 +20,7 @@ unsigned int g_buffer, g_position, g_normal, g_albedo, post_process_FBO, post_pr
 float scene_exposure = 1;
 Shader geometry_shader, basic, advanced,
     color_shader, circle_shader, downsample_shader,
-    upsample_shader, post_process_shader;
+    upsample_shader, post_process_shader, sky_shader;
 
 float quad_vertices[] = {
     // positions        // texture Coords
@@ -554,7 +554,7 @@ void OnResize(int new_width, int new_height)
     glBindTexture(GL_TEXTURE_2D, post_process_color);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, screen_width, screen_height, 0, GL_RGBA, GL_FLOAT, NULL);
     glBindRenderbuffer(GL_RENDERBUFFER, rboDepth);
-    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, screen_width, screen_height);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, screen_width, screen_height);
     glViewport(0, 0, screen_width, screen_height);
     if (bloom.enabled)
     {

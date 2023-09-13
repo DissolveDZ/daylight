@@ -9,26 +9,29 @@ void Init()
     window = SDL_CreateWindow("Wedoe Wonder", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, screen_width, screen_height, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_FULLSCREEN_DESKTOP); //
     context = SDL_GL_CreateContext(window);
     gladLoadGLLoader((GLADloadproc)SDL_GL_GetProcAddress);
-    SDL_GL_SetSwapInterval(0);
+    SDL_GL_SetSwapInterval(1);
     // SDL_SetRelativeMouseMode(SDL_TRUE);
     stbi_set_flip_vertically_on_load(1);
-    // glEnable(GL_MULTISAMPLE);
-    // glEnable(GL_DEPTH_TEST);
-    // glEnable(GL_BLEND);
-    // glEnable(GL_ALPHA_TEST);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    // glEnable(GL_CULL_FACE);
-    // glCullFace(GL_BACK);
-    // glFrontFace(GL_CCW);
+
+    glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LESS);
+    glEnable(GL_STENCIL_TEST);
+    glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
+    glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+
     BloomInit(6);
-    PostProcessBuffer();
     GBufferSetup();
+    PostProcessBuffer();
+
+    // make LoadShader() relative to shader path
     geometry_shader = LoadShader("resources/shaders/buffers.vert", "resources/shaders/buffers.frag");
     basic = LoadShader("resources/shaders/buffers.vert", "resources/shaders/buffers.frag");
     advanced = LoadShader("resources/shaders/vertex.vert", "resources/shaders/fragment.frag");
     color_shader = LoadShader("resources/shaders/buffers.vert", "resources/shaders/color.frag");
     circle_shader = LoadShader("resources/shaders/buffers.vert", "resources/shaders/circle.frag");
     post_process_shader = LoadShader("resources/shaders/vertex.vert", "resources/shaders/post_process.frag");
+    sky_shader = LoadShader("resources/shaders/vertex.vert", "resources/shaders/sky.frag");
 
     UseShader(post_process_shader);
     SetShaderInt(post_process_shader.ID, "lighting", 0);
