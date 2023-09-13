@@ -1,9 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "win_include.h"
-#include "test.h"
+#include "SpriteLight.h"
 
 void testfunction()
 {
-    printf("testing");
+    //printf("pain");
 }

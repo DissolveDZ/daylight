@@ -17,7 +17,7 @@
 #include "init.c"
 #include "update.c"
 #include "draw.c"
-#include "test.h"
+#include "SpriteLight.h"
 
 State state;
 int main(void)
