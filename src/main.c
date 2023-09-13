@@ -1,3 +1,4 @@
+#define SDL_MAIN_HANDLED
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -16,6 +17,7 @@
 #include "init.c"
 #include "update.c"
 #include "draw.c"
+#include "test.h"
 
 State state;
 int main(void)
@@ -26,6 +28,7 @@ int main(void)
     {
         Update();
         Draw();
+        testfunction();
     }
     glDeleteVertexArrays(1, &planeVAO);
     glDeleteBuffers(1, &VBO);
