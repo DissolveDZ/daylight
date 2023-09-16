@@ -1,9 +1,21 @@
+#define SDL_MAIN_HANDLED
 #include <stdio.h>
 #include <stdlib.h>
-#include "win_include.h"
-#include "SpriteLight.h"
-
-void testfunction()
-{
-    //printf("pain");
-}
+#include <math.h>
+#include <stdint.h>
+#include <stddef.h>
+#include <win_include.h>
+#include "glad.c"
+#include <glad/glad.h>
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
+#include "engine.h"
+#include "definitions.c"
+#include "shader.c"
+#include "texture.c"
+#include "collisions.c"
+#include "lights.c"
+#include "buffers.c"
+#include "bloom.c"
+#include "init.c"
+#include "draw.c"

@@ -1,8 +1,6 @@
-#include "main.h"
-#include "collisions.c"
-
 static inline void PlayerMovement(Player *player)
 {
+    paintest();
     uint8_t *key_state = SDL_GetKeyboardState(NULL);
     int dir = 0;
     if (key_state[SDL_SCANCODE_A] && !key_state[SDL_SCANCODE_D])

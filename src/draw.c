@@ -1,7 +1,7 @@
-#include "main.h"
 // #include "collisions.c"
 float p = 0;
 float bloom_filter_radius = 0.004f;
+
 void Draw()
 {
     p += frame_time;
@@ -45,7 +45,6 @@ void Draw()
     DrawLine((Vector2){state.player.entity.col.x, state.player.entity.col.y}, state.mouse_world, (vec4){50.f, 50.f, 50.f, 255.f});
     DrawLine((Vector2){state.player.entity.col.x, state.player.entity.col.y}, (Vector2){state.player.entity.col.x + state.player.entity.velocity.x * frame_time * 20, state.player.entity.col.y + state.player.entity.velocity.y * frame_time * 20}, (vec4){255.f, 50.f, 50.f, 255.f});
     DrawRectangleBasic((Rectangle){intersectionX, intersectionY, 0.25f, 0.25f, 0}, (vec4){0.f, 0.f, 0.f, 255.f});
-
     //glStencilFunc(GL_NEVER, 1, 0xFF);
     glStencilMask(0x00);
 
@@ -61,24 +60,13 @@ void Draw()
     DrawQuad();
 
     glStencilFunc(GL_EQUAL, 1, 0xFF);
-    UseShader(advanced);
-    SetShaderInt(advanced.ID, "g_position", 0);
-    SetShaderInt(advanced.ID, "g_normal", 1);
-    SetShaderInt(advanced.ID, "g_albedo", 2);
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, g_position);
-    glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_2D, g_normal);
-    glActiveTexture(GL_TEXTURE2);
-    glBindTexture(GL_TEXTURE_2D, g_albedo);
-    SetShaderVec3(advanced.ID, "view_pos", (vec3){state.camera.position.x, state.camera.position.y, state.camera.position.z});
-    DrawQuad();
+    LightingPass();
     glDisable(GL_STENCIL_TEST);
 
     // POST PROCESS
 
     // Bloom
-    RenderBloom(post_process_color, bloom_filter_radius, 1.0f, 1.0f);
+    //RenderBloom(post_process_color, bloom_filter_radius, 1.0f, 1.0f);
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -86,7 +74,7 @@ void Draw()
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, post_process_color);
     glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_2D, bloom.mip_chain[0].texture.ID);
+    //glBindTexture(GL_TEXTURE_2D, bloom.mip_chain[0].texture.ID);
     if (false)
     {
         glGenerateMipmap(GL_TEXTURE_2D); // Generate mipmaps every frame

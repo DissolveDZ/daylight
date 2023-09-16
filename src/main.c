@@ -4,22 +4,13 @@
 #include <math.h>
 #include <stdint.h>
 #include <win_include.h>
-#include "glad.c"
 #include <glad/glad.h>
-#include "texture.h"
-#define STB_IMAGE_IMPLEMENTATION
-#include "stb_image.h"
-#include "shader.h"
-#include "main.h"
-#include "lights.h"
-#include "buffers.c"
-#include "bloom.c"
+#include "engine.h"
+#include "def.h"
 #include "init.c"
 #include "update.c"
 #include "draw.c"
-#include "SpriteLight.h"
 
-State state;
 int main(void)
 {
     SDL_Init(SDL_INIT_EVERYTHING);
@@ -28,7 +19,6 @@ int main(void)
     {
         Update();
         Draw();
-        testfunction();
     }
     glDeleteVertexArrays(1, &planeVAO);
     glDeleteBuffers(1, &VBO);

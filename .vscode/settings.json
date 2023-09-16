@@ -8,6 +8,13 @@
         "shader.h": "c",
         "win_include.h": "c",
         "stdlib.h": "c",
-        "spritelight.h": "c"
+        "spritelight.h": "c",
+        "string.h": "c",
+        "limits": "c",
+        "typeinfo": "c",
+        "math.h": "c",
+        "collisions.h": "c",
+        "general.h": "c",
+        "engine.h": "c"
     }
 }
