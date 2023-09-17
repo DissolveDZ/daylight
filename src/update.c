@@ -1,6 +1,5 @@
 static inline void PlayerMovement(Player *player)
 {
-    paintest();
     uint8_t *key_state = SDL_GetKeyboardState(NULL);
     int dir = 0;
     if (key_state[SDL_SCANCODE_A] && !key_state[SDL_SCANCODE_D])
@@ -146,9 +145,9 @@ void ProcessInputs()
             case SDL_SCANCODE_F11:
                 state.fullscreen = !state.fullscreen;
             if (state.fullscreen)
-                SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN_DESKTOP);
+                SDL_SetWindowFullscreen(main_window, SDL_WINDOW_FULLSCREEN_DESKTOP);
             else
-                SDL_SetWindowFullscreen(window, SDL_WINDOW_BORDERLESS);
+                SDL_SetWindowFullscreen(main_window, SDL_WINDOW_BORDERLESS);
             // SDL_SetWindowDisplayMode(window, SDL_WINDOW_BORDERLESS);
             break;
             break;
@@ -175,13 +174,14 @@ void Update()
     glm_mat4_identity(projection);
     if (screen_height && screen_width)
         glm_perspective(glm_rad((float)screen_height / state.camera.fov), (float)screen_width / (float)screen_height, 0.1, 1000, projection);
+    printf("fov: %f\n", (float)screen_height);
     state.camera.position.x = Lerp(state.camera.position.x, state.player.entity.col.x, 7.5f * frame_time);
     state.camera.position.y = Lerp(state.camera.position.y, state.player.entity.col.y, 7.5f * frame_time);
     state.camera.position.z = Lerp(state.camera.position.z, state.camera.zoom, 7.5f * frame_time);
     int x, y;
     SDL_GetMouseState(&x, &y);
     // printf("x: %i y: %i\n", x, y);
-    state.mouse_world = GetScreenToWorld2D((Vector2){x, y});
+    state.mouse_world = GetScreenToWorld2D((Vector2){x, y}, projection);
     pight->position[0] = state.player.entity.col.x;
     pight->position[1] = state.player.entity.col.y;
     pight->position[2] = 1.0f;

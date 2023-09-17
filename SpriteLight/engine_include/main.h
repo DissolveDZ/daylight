@@ -6,137 +6,11 @@
 #include "lights.h"
 #pragma once
 
-static SDL_Event window_event;
-static SDL_Window *window;
-static SDL_GLContext context;
-
-static unsigned int g_buffer, g_position, g_normal, g_albedo, post_process_FBO, post_process_color, rboDepth;
 static float scene_exposure = 1;
-static Shader geometry_shader, basic, advanced,
-    color_shader, circle_shader, downsample_shader,
-    upsample_shader, post_process_shader, sky_shader;
-
-static float x1 = 0; // points for line (controlled by mouse)
-static float y_1 = 0;
-static float x2 = 0; // static point
-static float y2 = 0;
-
-static float sx = 200; // square position
-static float sy = 100;
-static float sw = 200; // and size
-static float sh = 200;
+static Shader circle_shader, downsample_shader, color_shader, upsample_shader;
 
 static float intersectionX = 0;
 static float intersectionY = 0;
-
-static float quad_vertices[] = {
-    // positions        // texture Coords
-    -1.0f,
-    1.0f,
-    0.0f,
-    0.0f,
-    1.0f,
-    -1.0f,
-    -1.0f,
-    0.0f,
-    0.0f,
-    0.0f,
-    1.0f,
-    1.0f,
-    0.0f,
-    1.0f,
-    1.0f,
-    1.0f,
-    -1.0f,
-    0.0f,
-    1.0f,
-    0.0f,
-};
-
-static float plane_vertices[] = {
-    // positions        // texture Coords
-    -0.5f,
-    0.5f,
-    0.0f,
-    0.0f,
-    1.0f,
-    -0.5f,
-    -0.5f,
-    0.0f,
-    0.0f,
-    0.0f,
-    0.5f,
-    0.5f,
-    0.0f,
-    1.0f,
-    1.0f,
-    0.5f,
-    -0.5f,
-    0.0f,
-    1.0f,
-    0.0f,
-};
-
-static float line_vertices[] = {
-    // position
-    0,
-    0,
-    0,
-    0,
-    10,
-    0,
-};
-
-static float cube_vertices[] = {
-    // positions          // normals           // texture coords
-    -0.5f, -0.5f, -0.5f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f,
-    0.5f, -0.5f, -0.5f, 0.0f, 0.0f, -1.0f, 1.0f, 0.0f,
-    0.5f, 0.5f, -0.5f, 0.0f, 0.0f, -1.0f, 1.0f, 1.0f,
-    0.5f, 0.5f, -0.5f, 0.0f, 0.0f, -1.0f, 1.0f, 1.0f,
-    -0.5f, 0.5f, -0.5f, 0.0f, 0.0f, -1.0f, 0.0f, 1.0f,
-    -0.5f, -0.5f, -0.5f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f,
-
-    -0.5f, -0.5f, 0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
-    0.5f, -0.5f, 0.5f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f,
-    0.5f, 0.5f, 0.5f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f,
-    0.5f, 0.5f, 0.5f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f,
-    -0.5f, 0.5f, 0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f,
-    -0.5f, -0.5f, 0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
-
-    -0.5f, 0.5f, 0.5f, -1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
-    -0.5f, 0.5f, -0.5f, -1.0f, 0.0f, 0.0f, 1.0f, 1.0f,
-    -0.5f, -0.5f, -0.5f, -1.0f, 0.0f, 0.0f, 0.0f, 1.0f,
-    -0.5f, -0.5f, -0.5f, -1.0f, 0.0f, 0.0f, 0.0f, 1.0f,
-    -0.5f, -0.5f, 0.5f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
-    -0.5f, 0.5f, 0.5f, -1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
-
-    0.5f, 0.5f, 0.5f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
-    0.5f, 0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f,
-    0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f,
-    0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f,
-    0.5f, -0.5f, 0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
-    0.5f, 0.5f, 0.5f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
-
-    -0.5f, -0.5f, -0.5f, 0.0f, -1.0f, 0.0f, 0.0f, 1.0f,
-    0.5f, -0.5f, -0.5f, 0.0f, -1.0f, 0.0f, 1.0f, 1.0f,
-    0.5f, -0.5f, 0.5f, 0.0f, -1.0f, 0.0f, 1.0f, 0.0f,
-    0.5f, -0.5f, 0.5f, 0.0f, -1.0f, 0.0f, 1.0f, 0.0f,
-    -0.5f, -0.5f, 0.5f, 0.0f, -1.0f, 0.0f, 0.0f, 0.0f,
-    -0.5f, -0.5f, -0.5f, 0.0f, -1.0f, 0.0f, 0.0f, 1.0f,
-
-    -0.5f, 0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f,
-    0.5f, 0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f,
-    0.5f, 0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,
-    0.5f, 0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,
-    -0.5f, 0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f,
-    -0.5f, 0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f};
-
-static unsigned int VBO = 0;
-static unsigned int planeVBO = 0, planeVAO = 0;
-static unsigned int quadVBO = 0, quadVAO = 0;
-static unsigned int lineVBO = 0, lineVAO = 0;
-static unsigned int cubeVBO = 0, cubeVAO = 0;
-
 typedef struct Vector2
 {
     float x;
@@ -149,12 +23,6 @@ typedef struct Vector3
     float y;
     float z;
 } Vector3;
-
-void paintest();
-
-static float frame_time;
-static unsigned int last_frame = 0;
-static unsigned int current_frame;
 
 static int screen_width = 1920;
 static int screen_height = 1080;
@@ -231,7 +99,6 @@ typedef struct Bloom
     bool karis_average;
     bool enabled;
 } Bloom;
-static Bloom bloom;
 typedef struct PointIntersect
 {
     Vector2 dist;
@@ -269,11 +136,8 @@ typedef struct State
     bool fullscreen;
 } State;
 static State state;
-static Texture cube;
-static Collider Boxes[10];
-static float frame_time;
-
-static mat4 projection, model, view;
+static int MAX_BLOOM_MIP = 10;
+static mat4 model, view;
 
 int GetRandomValue(int min, int max);
 
@@ -287,22 +151,29 @@ void DrawQuad();
 
 void DrawLine(Vector2 line_start, Vector2 line_end, vec4 color);
 
-void DrawRectangleBasic(Rectangle rec, vec4 color);
+void DrawRectangleBasic(Rectangle rec, vec4 color, Shader shader);
 
-void DrawEntity(Rectangle rec);
+void DrawEntity(Rectangle rec, Shader shader);
 
-void DrawCube(vec3 position, vec3 scale, Vector3 rotation);
+void DrawCube(vec3 position, vec3 scale, Vector3 rotation, Texture texture, Shader shader);
 
-void DrawRectangle(Rectangle rec);
+void DrawRectangle(Rectangle rec, Shader shader);
 
 // Draw a circle to a quad
 void DrawCircle(vec3 position, float radius, vec4 color);
 
 Vector3 Vector3Transform(vec3 v, mat4 mat);
 
-Vector2 GetScreenToWorld2D(Vector2 position);
-
+Vector2 GetScreenToWorld2D(Vector2 position, mat4 projection);
+void GBufferSetup(unsigned int *g_buffer, unsigned int *g_position, unsigned int *g_normal, unsigned int *g_albedo, unsigned int *depth);
+void PostProcessBuffer(unsigned int *post_process_fbo, unsigned int *post_process_color, unsigned int *depth);
+void BufferSetup(unsigned int *VAO, unsigned int *VBO, float vertices[], int size, bool textured, bool normals);
 void OnResize(int new_width, int new_height);
 void LightingPass();
 void engine_init(char *window_name, int width, int height, int bloom_strength);
+void BloomInit(int mip_amount, Bloom *bloom);
+void UpsampleBloom(float filter_radius, Bloom *bloom, unsigned int *quadVAO);
+void DownSampleBloom(unsigned int src_texture, float threshold, float knee, Bloom *bloom, unsigned int *quadVAO);
+void RenderBloom(unsigned int src_texture, float filter_radius, float threshold, float knee, Bloom *bloom, unsigned int *quadVAO);
+
 #endif // SPRITELIGHT_H

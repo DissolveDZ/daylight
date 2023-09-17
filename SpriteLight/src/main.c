@@ -13,7 +13,6 @@
 #include "definitions.c"
 #include "shader.c"
 #include "texture.c"
-#include "collisions.c"
 #include "lights.c"
 #include "buffers.c"
 #include "bloom.c"

@@ -5,9 +5,10 @@
 #include <stdint.h>
 #include <win_include.h>
 #include <glad/glad.h>
-#include "engine.h"
+#include "container.h"
 #include "def.h"
 #include "init.c"
+#include "collisions.c"
 #include "update.c"
 #include "draw.c"
 
@@ -23,8 +24,8 @@ int main(void)
     glDeleteVertexArrays(1, &planeVAO);
     glDeleteBuffers(1, &VBO);
     glDeleteProgram(basic.ID);
-    SDL_GL_DeleteContext(context);
-    SDL_DestroyWindow(window);
+    SDL_GL_DeleteContext(main_context);
+    SDL_DestroyWindow(main_window);
     SDL_Quit();
     return 0;
 }

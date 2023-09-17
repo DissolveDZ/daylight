@@ -1,10 +1,104 @@
 void Init()
 {
-        SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
+    //engine_init("Wedoe Wonder", 1920, 1080, 6);
+
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 6);
     // SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES,16);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
-    engine_init("Wedoe Wonder", 1920, 1080, 6);
+    printf("screen width: %i\n", screen_width);
+    main_window = SDL_CreateWindow("Wedoe Wonder", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, screen_width, screen_height, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_FULLSCREEN_DESKTOP);
+    main_context = SDL_GL_CreateContext(main_window);
+    gladLoadGLLoader((GLADloadproc)SDL_GL_GetProcAddress);
+    SDL_GL_SetSwapInterval(1);
+    // SDL_SetRelativeMouseMode(SDL_TRUE);
+    stbi_set_flip_vertically_on_load(1);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LESS);
+    glEnable(GL_STENCIL_TEST);
+    glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
+    glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+
+    BloomInit(6, &bloom);
+
+    glGenFramebuffers(1, &g_buffer);
+    glBindFramebuffer(GL_FRAMEBUFFER, g_buffer);
+    glGenTextures(1, &g_position);
+    glBindTexture(GL_TEXTURE_2D, g_position);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, screen_width, screen_height, 0, GL_RGBA, GL_FLOAT, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, g_position, 0);
+    // normal color buffer
+    glGenTextures(1, &g_normal);
+    glBindTexture(GL_TEXTURE_2D, g_normal);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, screen_width, screen_height, 0, GL_RGBA, GL_FLOAT, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, g_normal, 0);
+    // color + specular color buffer
+    glGenTextures(1, &g_albedo);
+    glBindTexture(GL_TEXTURE_2D, g_albedo);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, screen_width, screen_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, g_albedo, 0);
+
+    // tell OpenGL which color attachments we'll use (of this framebuffer) for rendering
+    unsigned int attachments[3] = {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2};
+    glDrawBuffers(3, attachments);
+    // create and attach depth buffer (renderbuffer)
+    glGenRenderbuffers(1, &depth_rbo);
+    glBindRenderbuffer(GL_RENDERBUFFER, depth_rbo);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, screen_width, screen_height);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, depth_rbo);
+    // check if framebuffer is complete
+    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+        printf("Framebuffer not complete!");
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    glGenFramebuffers(1, &post_process_fbo);
+    glBindFramebuffer(GL_FRAMEBUFFER, post_process_fbo);
+    glGenTextures(1, &post_process_color);
+    glBindTexture(GL_TEXTURE_2D, post_process_color);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, screen_width, screen_height, 0, GL_RGBA, GL_FLOAT, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, post_process_color, 0);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, depth_rbo);
+    unsigned int attachments1[1] = {GL_COLOR_ATTACHMENT0};
+    glDrawBuffers(1, attachments1);
+
+    // PostProcessBuffer(&post_process_fbo, &post_process_color, &depth_rbo);
+
+    // make LoadShader() relative to shader path
+    geometry_shader = LoadShader("resources/shaders/buffers.vert", "resources/shaders/buffers.frag");
+    printf("basicc shader: %i\n", geometry_shader.ID);
+    basic = LoadShader("resources/shaders/buffers.vert", "resources/shaders/buffers.frag");
+
+    advanced = LoadShader("resources/shaders/vertex.vert", "resources/shaders/fragment.frag");
+    color_shader = LoadShader("resources/shaders/buffers.vert", "resources/shaders/color.frag");
+    circle_shader = LoadShader("resources/shaders/buffers.vert", "resources/shaders/circle.frag");
+    post_process_shader = LoadShader("resources/shaders/vertex.vert", "resources/shaders/post_process.frag");
+    sky_shader = LoadShader("resources/shaders/vertex.vert", "resources/shaders/sky.frag");
+
+    UseShader(post_process_shader);
+    SetShaderInt(post_process_shader.ID, "lighting", 0);
+    SetShaderInt(post_process_shader.ID, "bloom", 1);
+
+    UseShader(advanced);
+    SetShaderInt(advanced.ID, "g_position", 0);
+    SetShaderInt(advanced.ID, "g_normal", 1);
+    SetShaderInt(advanced.ID, "g_albedo", 2);
+
+    BufferSetup(&planeVAO, &VBO, plane_vertices, sizeof(plane_vertices), true, false);
+    BufferSetup(&quadVAO, &quadVBO, quad_vertices, sizeof(quad_vertices), true, false);
+    BufferSetup(&lineVAO, &lineVBO, line_vertices, sizeof(line_vertices), false, false);
+    BufferSetup(&cubeVAO, &cubeVBO, cube_vertices, sizeof(cube_vertices), true, true);
     state.fullscreen = true;
     state.recs_max = 10;
     state.recs = malloc(sizeof(unsigned int) * state.recs_max);
@@ -69,35 +163,11 @@ void Init()
     PointLight *neu = CreatePointLight((vec3){Boxes[2].x, 3, 1}, (vec3){2, 1.7, 1.2}, (vec3){0.1f, 0.1f, 0.1f}, 3.4f, 1.2f);
     PointLight *zeh = CreatePointLight((vec3){-1, 0, 1}, (vec3){1, 0.7, 0.2}, (vec3){0.1f, 0.1f, 0.1f}, 5.0f, 1.2f);
     */
-    // point = CreatePointLight((vec3){0, 0, 1}, (vec3){1, 1, 1}, (vec3){0.1f, 0.1f, 0.1f}, 1);
-    // printf("Point lights count: %d\n", light_ubo_data->point_light_count);
-    //  Now update the UBO with the new data
-    // UseShader(basic);
     glActiveTexture(GL_TEXTURE0);
     state.player.entity.tex = LoadTexture2D("resources/vedl.png", 0, false);
     SetShaderInt(geometry_shader.ID, "tex", state.player.entity.tex.ID);
     cube = LoadTexture2D("resources/cube.png", 0, false);
     state.player.entity.col = RecToCollider((Rectangle){0, 20, 2, 2, 0}, false, true);
     state.player.entity.floor_check = (Rectangle){state.player.entity.col.x, state.player.entity.col.y - state.player.entity.col.height / 2, state.player.entity.col.width, 0.05f};
-    // state.player.entity.tex.width = state.player.entity.col.width;
-    // state.player.entity.tex.height = state.player.entity.col.height;
     OnResize(screen_width, screen_height);
-    /*
-
-    water = (Rectangle){1200, 225, 200, 200};
-    SetConfigFlags(FLAG_WINDOW_RESIZABLE | FLAG_VSYNC_HINT);
-    InitWindow(screen_width, screen_height, "Wedoe Wonder");
-    water_noise = LoadTexture("resources/water_noise.png");
-    pight = CreateLight(LIGHT_POINT, (Vector2){0, 255}, Vector2Zero(), WHITE, light_shader);
-    water_shader = LoadShader(0, "resources/shaders/water.fs");
-    light_shader = LoadShader("resources/shaders/lighting.vs", "resources.shaders/lighting.fs");
-    light_shader.locs[SHADER_LOC_VECTOR_VIEW] = GetShaderLocation(light_shader, "viewPos");
-    int ambientLoc = GetShaderLocation(light_shader, "ambient");
-    SetShaderValue(light_shader, ambientLoc, (float[4]){ 0.1f, 0.1f, 0.1f, 1.0f }, SHADER_UNIFORM_VEC4);
-    OnResize();
-    state.camera.target = (Vector2){state.player.entity.col.x + 20.0f, state.player.entity.col.y + 20.0f};
-    state.camera.rotation = 0.0f;
-    state.camera.zoom = 1.0f;
-    SetTargetFPS(170);
-    */
 }
