@@ -1,4 +1,4 @@
-void BloomInit(int mip_amount, Bloom *bloom)
+void BloomInit(int mip_amount, Bloom *bloom, int screen_width, int screen_height)
 {
     glGenFramebuffers(1, &bloom->FBO);
     glBindFramebuffer(GL_FRAMEBUFFER, bloom->FBO);
@@ -90,7 +90,7 @@ void UpsampleBloom(float filter_radius, Bloom *bloom, unsigned int *quadVAO)
     glUseProgram(0);
 }
 
-void DownSampleBloom(unsigned int src_texture, float threshold, float knee, Bloom *bloom, unsigned int *quadVAO)
+void DownSampleBloom(unsigned int src_texture, float threshold, float knee, Bloom *bloom, unsigned int *quadVAO, int screen_width, int screen_height)
 {
     UseShader(downsample_shader);
     SetShaderVec2(downsample_shader.ID, "src_resolution", (vec2){(float)screen_width, (float)screen_height});
@@ -131,10 +131,10 @@ void DownSampleBloom(unsigned int src_texture, float threshold, float knee, Bloo
 }
 
 // Render Bloom, will disable threshold when 0
-void RenderBloom(unsigned int src_texture, float filter_radius, float threshold, float knee, Bloom *bloom, unsigned int *quadVAO)
+void RenderBloom(unsigned int src_texture, float filter_radius, float threshold, float knee, Bloom *bloom, unsigned int *quadVAO, int screen_width, int screen_height)
 {
     glBindFramebuffer(GL_FRAMEBUFFER, bloom->FBO);
-    DownSampleBloom(src_texture, threshold, knee, bloom, quadVAO);
+    DownSampleBloom(src_texture, threshold, knee, bloom, quadVAO, screen_width, screen_height);
     UpsampleBloom(filter_radius, bloom, quadVAO);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glViewport(0, 0, screen_width, screen_height);

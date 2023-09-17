@@ -1,4 +1,4 @@
-void GBufferSetup(unsigned int *g_buffer, unsigned int *g_position, unsigned int *g_normal, unsigned int *g_albedo, unsigned int *depth)
+void GBufferSetup(unsigned int *g_buffer, unsigned int *g_position, unsigned int *g_normal, unsigned int *g_albedo, unsigned int *depth, int screen_width, int screen_height)
 {
     glGenFramebuffers(1, g_buffer);
     glBindFramebuffer(GL_FRAMEBUFFER, *g_buffer);
@@ -36,7 +36,7 @@ void GBufferSetup(unsigned int *g_buffer, unsigned int *g_position, unsigned int
         printf("Framebuffer not complete!");
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
-void PostProcessBuffer(unsigned int *post_process_fbo, unsigned int *post_process_color, unsigned int *depth)
+void PostProcessBuffer(unsigned int *post_process_fbo, unsigned int *post_process_color, unsigned int *depth, int screen_width, int screen_height)
 {
     glGenFramebuffers(1, post_process_fbo);
     glBindFramebuffer(GL_FRAMEBUFFER, *post_process_fbo);

@@ -16,7 +16,10 @@ SDL_Event window_event;
 SDL_Window *main_window;
 SDL_GLContext main_context;
 
-mat4 projection;
+mat4 projection, model, view;
+
+int screen_width = 1920;
+int screen_height = 1080;
 
 unsigned int g_buffer, g_position, g_normal, g_albedo, post_process_fbo, post_process_color, depth_rbo;
 

@@ -11,6 +11,8 @@ void Init()
     main_context = SDL_GL_CreateContext(main_window);
     gladLoadGLLoader((GLADloadproc)SDL_GL_GetProcAddress);
     SDL_GL_SetSwapInterval(1);
+    SDL_Surface* icon = LoadSDLImage("resources/vedl.png");
+    SDL_SetWindowIcon(main_window, icon);
     // SDL_SetRelativeMouseMode(SDL_TRUE);
     stbi_set_flip_vertically_on_load(1);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -21,7 +23,7 @@ void Init()
     glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
     glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
 
-    BloomInit(6, &bloom);
+    BloomInit(6, &bloom, screen_width, screen_height);
 
     glGenFramebuffers(1, &g_buffer);
     glBindFramebuffer(GL_FRAMEBUFFER, g_buffer);

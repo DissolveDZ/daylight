@@ -10,3 +10,4 @@ typedef struct Texture
 } Texture;
 
 Texture LoadTexture2D(const char *path, float anisotropy, bool gamma);
+SDL_Surface *LoadSDLImage(char *path);

@@ -45,3 +45,38 @@ Texture LoadTexture2D(const char *path, float anisotropy, bool gamma)
     stbi_image_free(data);
     return texture;
 }
+
+SDL_Surface *LoadSDLImage(char* filename)
+{
+	// Read data
+	int32_t width, height, bytesPerPixel;
+	void* data = stbi_load(filename, &width, &height, &bytesPerPixel, 0);
+
+	// Calculate pitch
+	int pitch;
+    pitch = width * bytesPerPixel;
+    pitch = (pitch + 3) & ~3;
+
+    // Setup relevance bitmask
+	int32_t Rmask, Gmask, Bmask, Amask;
+#if SDL_BYTEORDER == SDL_LIL_ENDIAN
+    Rmask = 0x000000FF;
+    Gmask = 0x0000FF00;
+    Bmask = 0x00FF0000;
+    Amask = (bytesPerPixel == 4) ? 0xFF000000 : 0;
+#else
+    int s = (bytesPerPixel == 4) ? 0 : 8;
+    Rmask = 0xFF000000 >> s;
+    Gmask = 0x00FF0000 >> s;
+    Bmask = 0x0000FF00 >> s;
+    Amask = 0x000000FF >> s;
+#endif
+	SDL_Surface* surface = SDL_CreateRGBSurfaceFrom(data, width, height, bytesPerPixel*8, pitch, Rmask, Gmask,
+                             Bmask, Amask);
+	if (!surface)
+	{
+		// NOTE: Should free stbi_load 'data' variable here
+		return NULL;
+	}
+	return surface;
+}

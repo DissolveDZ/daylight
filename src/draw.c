@@ -250,7 +250,7 @@ void Draw()
     // POST PROCESS
 
     // Bloom
-    RenderBloom(post_process_color, bloom_filter_radius, 1.0f, 1.0f, &bloom, quadVAO);
+    RenderBloom(post_process_color, bloom_filter_radius, 1.0f, 1.0f, &bloom, quadVAO, screen_width, screen_height);
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

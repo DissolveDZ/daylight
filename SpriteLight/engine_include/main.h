@@ -24,9 +24,6 @@ typedef struct Vector3
     float z;
 } Vector3;
 
-static int screen_width = 1920;
-static int screen_height = 1080;
-
 typedef struct Camera
 {
     Vector3 position;
@@ -137,43 +134,23 @@ typedef struct State
 } State;
 static State state;
 static int MAX_BLOOM_MIP = 10;
-static mat4 model, view;
 
 int GetRandomValue(int min, int max);
 
 float Lerp(float start, float end, float amount);
 
-Rectangle *CreateRectangle(int x, int y, int width, int height, Texture tex);
-
-Collider RecToCollider(Rectangle rec, bool rotating, bool dynamic);
-
-void DrawQuad();
-
-void DrawLine(Vector2 line_start, Vector2 line_end, vec4 color);
-
-void DrawRectangleBasic(Rectangle rec, vec4 color, Shader shader);
-
-void DrawEntity(Rectangle rec, Shader shader);
-
-void DrawCube(vec3 position, vec3 scale, Vector3 rotation, Texture texture, Shader shader);
-
-void DrawRectangle(Rectangle rec, Shader shader);
-
-// Draw a circle to a quad
-void DrawCircle(vec3 position, float radius, vec4 color);
-
 Vector3 Vector3Transform(vec3 v, mat4 mat);
 
 Vector2 GetScreenToWorld2D(Vector2 position, mat4 projection);
-void GBufferSetup(unsigned int *g_buffer, unsigned int *g_position, unsigned int *g_normal, unsigned int *g_albedo, unsigned int *depth);
-void PostProcessBuffer(unsigned int *post_process_fbo, unsigned int *post_process_color, unsigned int *depth);
+void GBufferSetup(unsigned int *g_buffer, unsigned int *g_position, unsigned int *g_normal, unsigned int *g_albedo, unsigned int *depth, int screen_width, int screen_height);
+void PostProcessBuffer(unsigned int *post_process_fbo, unsigned int *post_process_color, unsigned int *depth, int screen_width, int screen_height);
 void BufferSetup(unsigned int *VAO, unsigned int *VBO, float vertices[], int size, bool textured, bool normals);
 void OnResize(int new_width, int new_height);
 void LightingPass();
 void engine_init(char *window_name, int width, int height, int bloom_strength);
-void BloomInit(int mip_amount, Bloom *bloom);
+void BloomInit(int mip_amount, Bloom *bloom, int screen_width, int screen_height);
 void UpsampleBloom(float filter_radius, Bloom *bloom, unsigned int *quadVAO);
-void DownSampleBloom(unsigned int src_texture, float threshold, float knee, Bloom *bloom, unsigned int *quadVAO);
-void RenderBloom(unsigned int src_texture, float filter_radius, float threshold, float knee, Bloom *bloom, unsigned int *quadVAO);
+void DownSampleBloom(unsigned int src_texture, float threshold, float knee, Bloom *bloom, unsigned int *quadVAO, int screen_width, int screen_height);
+void RenderBloom(unsigned int src_texture, float filter_radius, float threshold, float knee, Bloom *bloom, unsigned int *quadVAO, int screen_width, int screen_height);
 
 #endif // SPRITELIGHT_H
